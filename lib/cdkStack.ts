@@ -12,14 +12,14 @@ export class CdkStack extends cdk.Stack {
     // Email Verification Lambda
     const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
       runtime: lambdaRuntime,
-      code: lambda.Code.fromAsset('lambda'),
+      code: lambda.Code.fromAsset('src/lambda'),
       handler: 'emailVerification.handler',
     });
 
     // User Registration Lambda
     const userRegistrationLambda = new lambda.Function(this, 'UserRegistrationHandler', {
       runtime: lambdaRuntime,
-      code: lambda.Code.fromAsset('lambda'),
+      code: lambda.Code.fromAsset('src/lambda'),
       handler: 'userRegistration.handler',
     });
 

@@ -7,7 +7,5 @@ node_modules
 .cdk.staging
 cdk.out
 
-
-
-.nx/cache
-.nx/workspace-data
+.env
+dist
