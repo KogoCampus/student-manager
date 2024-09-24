@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/oauth2-student-user-svc.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/student-manager.ts",
   "watch": {
     "include": [
       "**"
