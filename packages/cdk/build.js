@@ -8,7 +8,7 @@ esbuild
     entryPoints: ['bin/student-manager.ts'],
     bundle: true,
     platform: 'node',
-    outfile: 'dist/student-manager.js',
+    outfile: 'build/student-manager.js',
     external: ['aws-sdk'], // Exclude AWS SDK since it's available in the Lambda runtime
     sourcemap: true,
   })

@@ -1,0 +1,44 @@
+{
+  "name": "@student-maanager/cdk",
+  "version": "0.1.0",
+  "license": "GPL-3.0",
+  "bin": {
+    "student-manager": "build/student-manager.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "bootstrap": "yarn build && cdk bootstrap --context env=staging",
+    "deploy": "npm run build && npm run bootstrap:staging && cdk deploy StudentManagerStagingStack",
+    "destroy": "cdk destroy StudentManagerStagingStack",
+    "bootstrap:prod": "yarn build && cdk bootstrap --context env=production",
+    "deploy:prod": "npm run build && npm run bootstrap:prod && cdk deploy StudentManagerProductionStack",
+    "destroy:prod": "cdk destroy StudentManagerProductionStack",
+    "cdk": "cdk",
+    "test": "jest",
+    "lint": "eslint lib/**/*.ts src/**/*.ts bin/**/*.ts",
+    "format": "prettier .",
+    "format:write": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "aws-cdk": "2.152.0",
+    "esbuild": "^0.24.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.152.0",
+    "constructs": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "source-map-support": "^0.5.21"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "bracketSpacing": true,
+    "bracketSameLine": true,
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all",
+    "useTabs": false
+  }
+}
