@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  EmailVerificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/lambda/emailVerification.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+          REDIS_ENDPOINT: host.docker.internal
+          REDIS_PORT: "63790"
+      Events:
+        EmailVerification:
+          Type: Api
+          Properties:
+            Path: /student/verify-email
+            Method: post
+
+  UserRegistrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/lambda/userRegistration.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+          REDIS_ENDPOINT: host.docker.internal
+          REDIS_PORT: "63790"
+          COGNITO_USER_POOL_ID: us-west-2_Onci94rlj
+      Events:
+        UserRegistration:
+          Type: Api
+          Properties:
+            Path: /student/register
+            Method: post
+
+Outputs:
+  EmailVerificationFunctionArn:
+    Description: "Email Verification Lambda Function ARN"
+    Value: !GetAtt EmailVerificationFunction.Arn
+
+  UserRegistrationFunctionArn:
+    Description: "User Registration Lambda Function ARN"
+    Value: !GetAtt UserRegistrationFunction.Arn

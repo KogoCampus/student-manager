@@ -3,6 +3,9 @@
 node_modules
 **/node_modules
 
+**/dist
+**/build
+
 .nx/cache
 .nx/workspace-data
 .nx/installation

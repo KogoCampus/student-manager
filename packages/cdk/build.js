@@ -1,21 +1,74 @@
 const esbuild = require('esbuild');
-const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
 
-console.log('\x1b[34mBuilding the project...\x1b[0m');
+// ANSI escape codes for colors
+const greenText = '\x1b[32m';
+const blueText = '\x1b[34m';
+const redText = '\x1b[31m';
+const resetText = '\x1b[0m';
+const color = (text, color) => `${color}${text}${resetText}`;
 
+// =================================================================
+// Build Options
+const commonOptions = {
+  bundle: true,
+  platform: 'node',
+  target: 'node20',
+  external: ['aws-sdk'], // AWS SDK v2 is provided in the Lambda runtime, no need to bundle it
+  sourcemap: true,
+};
+
+// =================================================================
+// CDK Build Options (bin/student-manager.ts -> dist/cdk)
+const cdkBuild = {
+  entryPoints: ['bin/student-manager.ts'],
+  outdir: 'dist/cdk',
+  format: 'cjs',
+  ...commonOptions,
+};
+
+// =================================================================
+// Lambda Build Options (src/lambda -> dist/lambda)
+const scanLambdaHandlers = dir => {
+  const handlers = fs
+    .readdirSync(dir)
+    .filter(file => file.endsWith('.ts'))
+    .map(file => path.join(dir, file));
+
+  // Print out the handlers in green
+  console.log(color('Found Lambda handlers:', greenText));
+  handlers.forEach(handler => {
+    console.log(color(`  ${handler}`, greenText));
+  });
+
+  return handlers;
+};
+
+const lambdaDir = path.join(__dirname, 'src', 'lambda');
+const lambdaBuild = {
+  entryPoints: scanLambdaHandlers(lambdaDir),
+  outdir: 'dist/lambda',
+  format: 'cjs',
+  ...commonOptions,
+};
+
+// =================================================================
+// Build Script
+console.log(color('Building the project...', blueText));
+
+// Step 1: Build Lambda handlers first
 esbuild
-  .build({
-    entryPoints: ['bin/student-manager.ts'],
-    bundle: true,
-    platform: 'node',
-    outfile: 'build/student-manager.js',
-    external: ['aws-sdk'], // Exclude AWS SDK since it's available in the Lambda runtime
-    sourcemap: true,
+  .build(lambdaBuild)
+  .then(() => {
+    console.log(color('Lambda build complete (dist/lambda)', blueText));
+    return esbuild.build(cdkBuild);
   })
   .then(() => {
-    console.log('\x1b[34mBuild completed successfully.\x1b[0m');
+    console.log(color('CDK build complete (dist/cdk)', blueText));
   })
-  .catch(() => {
-    console.error('\x1b[31mBuild failed.\x1b[0m');
+  .catch(err => {
+    console.error(color('Build failed', redText));
+    console.error(err);
     process.exit(1);
   });

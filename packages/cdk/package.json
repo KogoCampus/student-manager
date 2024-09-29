@@ -3,16 +3,14 @@
   "version": "0.1.0",
   "license": "GPL-3.0",
   "bin": {
-    "student-manager": "build/student-manager.js"
+    "student-manager": "dist/cdk/student-manager.js"
   },
   "scripts": {
+    "dev": "bash bin/local-sam.sh",
     "build": "node build.js",
     "bootstrap": "yarn build && cdk bootstrap --context env=staging",
-    "deploy": "npm run build && npm run bootstrap:staging && cdk deploy StudentManagerStagingStack",
-    "destroy": "cdk destroy StudentManagerStagingStack",
-    "bootstrap:prod": "yarn build && cdk bootstrap --context env=production",
-    "deploy:prod": "npm run build && npm run bootstrap:prod && cdk deploy StudentManagerProductionStack",
-    "destroy:prod": "cdk destroy StudentManagerProductionStack",
+    "deploy": "yarn bootstrap && cdk deploy --all",
+    "destroy": "cdk destroy --all",
     "cdk": "cdk",
     "test": "jest",
     "lint": "eslint lib/**/*.ts src/**/*.ts bin/**/*.ts",
@@ -21,24 +19,18 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.145",
+    "@types/js-yaml": "^4.0.9",
     "aws-cdk": "2.152.0",
     "esbuild": "^0.24.0"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.658.1",
+    "@aws-sdk/client-ses": "^3.658.1",
     "aws-cdk-lib": "2.152.0",
     "constructs": "^10.0.0",
     "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0",
+    "redis": "^4.7.0",
     "source-map-support": "^0.5.21"
-  },
-  "prettier": {
-    "arrowParens": "avoid",
-    "bracketSpacing": true,
-    "bracketSameLine": true,
-    "printWidth": 120,
-    "semi": true,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "all",
-    "useTabs": false
   }
 }

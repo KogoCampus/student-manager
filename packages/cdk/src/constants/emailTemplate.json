@@ -1,0 +1,23 @@
+{
+  "verification": {
+    "Template": {
+      "SubjectPart": "Kogo - Your Verification Code",
+      "TextPart": "Hello,\n\nYour verification code is {{verificationCode}}.\n\nThank you,\nKogo Team",
+      "HtmlPart": "<html><body><p>Hello,</p><p>Your verification code is <strong>{{verificationCode}}</strong>.</p><p>Thank you,<br>Kogo Team</p></body></html>"
+    }
+  },
+  "passwordReset": {
+    "Template": {
+      "SubjectPart": "Password Reset",
+      "TextPart": "Hello,\n\nYou requested a password reset. Your reset code is {{resetCode}}.\n\nThank you,\nStudent Manager Team",
+      "HtmlPart": "<html><body><p>Hello,</p><p>Your requested password reset. Your reset code is <strong>{{resetCode}}</strong>.</p><p>Thank you,<br>Student Manager Team</p></body></html>"
+    }
+  },
+  "welcome": {
+    "Template": {
+      "SubjectPart": "Welcome to Kogo",
+      "TextPart": "Hello,\n\nWelcome to Kogo! We're glad to have you on board.\n\nThank you,\nStudent Manager Team",
+      "HtmlPart": "<html><body><p>Hello,</p><p>Welcome to Kogo! We're glad to have you on board.</p><p>Thank you,<br>Student Manager Team</p></body></html>"
+    }
+  }
+}
