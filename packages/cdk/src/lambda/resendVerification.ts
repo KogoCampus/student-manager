@@ -4,10 +4,10 @@ import { successResponse, errorResponse, exceptionResponse } from '../utils/lamb
 import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 import ses from '../../lib/import/ses';
-import { isDesignatedSchoolEmail } from '../utils/schoolInfo';
 
 // Constants
-const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)
+const EXPIRATION_TIME = 900; // 15 minutes for the verification code expiry
+const RESEND_WAIT_TIME = 30; // 30 seconds wait time for resending the code
 
 // SES Client
 const SES = new SESClient({ region: ses.sesIdentityRegion });
@@ -20,22 +20,28 @@ export const handler: APIGatewayProxyHandler = async event => {
       return errorResponse('Email query parameter is required', 400);
     }
 
-    if (!isDesignatedSchoolEmail(email)) {
-      return errorResponse('Email is not from a designated school domain', 400);
+    const redis = RedisClient.getInstance();
+
+    // Check if the resend wait time has passed
+    const resendKey = `resend:${email}`;
+    const resendState = await redis.get(resendKey);
+
+    if (resendState) {
+      return errorResponse('Please wait before requesting a new verification code', 429); // Too many requests
     }
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const redis = RedisClient.getInstance();
-
-    // Set verification code with expiry in Redis
+    // Set the new verification code with expiry in Redis
     await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
+    await redis.setWithExpiry(resendKey, 'wait', RESEND_WAIT_TIME);
 
+    // Prepare and send the verification email
     const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'no-reply@kogocampus.com');
     const command = new SendEmailCommand(emailParams);
     await SES.send(command);
 
-    return successResponse({ message: 'Verification email sent' });
+    return successResponse({ message: 'Verification code resent successfully' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return exceptionResponse(error);

@@ -1,0 +1,64 @@
+serverless:
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/lambda/signIn.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: us-west-2_Onci94rlj
+          COGNITO_CLIENT_ID: your-cognito-client-id
+      Events:
+        SignIn:
+          Type: Api
+          Properties:
+            Path: /student/signin
+            Method: post
+
+openapi:
+  paths:
+    /student/signin:
+      post:
+        summary: Student Sign In
+        description: Authenticates a student with their username and password, returning access, ID, and refresh tokens.
+        requestBody:
+          description: The username and password for the student sign-in
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: The username of the student.
+                  password:
+                    type: string
+                    description: The password of the student.
+        responses:
+          '200':
+            description: Student successfully authenticated and tokens returned
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "User successfully authenticated"
+                    accessToken:
+                      type: string
+                      description: Access token for API authorization
+                    idToken:
+                      type: string
+                      description: ID token for user identification
+                    refreshToken:
+                      type: string
+                      description: Token used to refresh the access token
+          '400':
+            description: Bad request - missing or invalid parameters
+          '401':
+            description: Unauthorized - invalid username or password
+          '500':
+            description: Internal server error

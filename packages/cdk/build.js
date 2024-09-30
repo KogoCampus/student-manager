@@ -1,6 +1,7 @@
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
+const YAML = require('yaml');
 
 // ANSI escape codes for colors
 const greenText = '\x1b[32m';
@@ -54,10 +55,78 @@ const lambdaBuild = {
 };
 
 // =================================================================
+// Open API Docs Generation
+const distDir = path.join(__dirname, 'dist');
+const distOpenApi = path.join(distDir, 'openapi.yaml');
+
+const assembleOpenApiDocs = () => {
+  const openApiTemplate = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Student Manager API',
+      description: 'API for handling student accounts. i.e email verification, registration, etc',
+      version: '1.0.0',
+    },
+    servers: [
+      {
+        url: 'https://api.staging.kogocampus.com',
+        description: 'Delievered via AWS API Gateway',
+      },
+    ],
+    paths: {},
+  };
+
+  // Merge all the path definitions into the main OpenAPI object
+  const apiFiles = fs.readdirSync(lambdaDir).filter(file => file.endsWith('.yaml'));
+  apiFiles.forEach(file => {
+    const filePath = path.join(lambdaDir, file);
+    const apiYamlContent = fs.readFileSync(filePath, 'utf8');
+    const apiDoc = YAML.parse(apiYamlContent);
+    // Merge OpenAPI docs
+    if (apiDoc.openapi && apiDoc.openapi.paths) {
+      Object.assign(openApiTemplate.paths, apiDoc.openapi.paths);
+      console.log(color(`  Merged ${file}`, greenText));
+    }
+  });
+
+  // Write the merged OpenAPI specification to dist/openapi.yaml
+  const openApiYaml = YAML.stringify(openApiTemplate);
+  fs.mkdirSync(distDir, { recursive: true });
+  fs.writeFileSync(distOpenApi, openApiYaml);
+  console.log(color('OpenAPI documentation assembled (dist/openapi.yaml)', blueText));
+};
+
+// =================================================================
+// Serverless Application Model (SAM) Template Generation
+const distSam = path.join(distDir, 'serverless.yaml');
+const commonSamTemplatePath = path.join(__dirname, 'serverless.yaml');
+
+const assembleSamTemplate = () => {
+  const commonSamTemplate = YAML.parse(fs.readFileSync(commonSamTemplatePath, 'utf8'));
+
+  const apiFiles = fs.readdirSync(lambdaDir).filter(file => file.endsWith('.yaml'));
+  apiFiles.forEach(file => {
+    const filePath = path.join(lambdaDir, file);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const fileDoc = YAML.parse(fileContent);
+
+    // Merge SAM docs
+    if (fileDoc.serverless && fileDoc.serverless) {
+      Object.assign(commonSamTemplate.Resources, fileDoc.serverless);
+      console.log(color(`  Merged ${file} into SAM template`, greenText));
+    }
+  });
+
+  // Write the merged SAM template to dist/serverless.yaml
+  const samYaml = YAML.stringify(commonSamTemplate);
+  fs.writeFileSync(distSam, samYaml);
+  console.log(color('SAM template assembled (dist/serverless.yaml)', blueText));
+};
+
+// =================================================================
 // Build Script
 console.log(color('Building the project...', blueText));
 
-// Step 1: Build Lambda handlers first
 esbuild
   .build(lambdaBuild)
   .then(() => {
@@ -66,6 +135,14 @@ esbuild
   })
   .then(() => {
     console.log(color('CDK build complete (dist/cdk)', blueText));
+  })
+  .then(() => {
+    console.log(color('Assembling OpenAPI documentation...', blueText));
+    assembleOpenApiDocs();
+  })
+  .then(() => {
+    console.log(color('Assembling SAM template...', blueText));
+    assembleSamTemplate();
   })
   .catch(err => {
     console.error(color('Build failed', redText));

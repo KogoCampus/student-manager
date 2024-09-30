@@ -1,0 +1,38 @@
+serverless:
+  ResendVerificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/lambda/resendVerification.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+          REDIS_ENDPOINT: host.docker.internal
+          REDIS_PORT: "63790"
+      Events:
+        ResendVerification:
+          Type: Api
+          Properties:
+            Path: /student/resend-verification
+            Method: post
+
+openapi:
+  paths:
+    /student/resend-verification:
+      post:
+        summary: Resend a verification code
+        description: Resends a verification code to the student's email.
+        parameters:
+          - name: email
+            in: query
+            required: true
+            description: The email address of the student.
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Verification email resent
+          '429':
+            description: Too many requests - please wait before resending
+          '500':
+            description: Internal server error

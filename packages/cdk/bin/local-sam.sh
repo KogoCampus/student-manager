@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Generate a random suffix for container names
+RANDOM_SUFFIX=$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 6 | head -n 1)
+REDIS_CONTAINER_NAME="student-manager-redis-$RANDOM_SUFFIX"
+
 # Function to check if Docker is installed
 check_docker_installed() {
     if ! command -v docker &> /dev/null; then
@@ -28,9 +32,9 @@ build_project() {
 
 # Function to pull and run Redis in the background
 start_redis() {
-    echo "Starting Redis in the background..."
+    echo "Starting Redis in the background with container name $REDIS_CONTAINER_NAME..."
     docker pull redis:latest
-    docker run --name student-manager-redis -d -p 63790:6379 redis:latest
+    docker run --name "$REDIS_CONTAINER_NAME" -d -p 63790:6379 redis:latest
     if [ $? -ne 0 ]; then
         echo "Error: Failed to start Redis."
         exit 1
@@ -39,14 +43,14 @@ start_redis() {
 
 # Function to stop Redis
 stop_redis() {
-    echo "Stopping Redis..."
-    docker stop student-manager-redis
-    docker rm student-manager-redis
+    echo "Stopping Redis container $REDIS_CONTAINER_NAME..."
+    docker stop "$REDIS_CONTAINER_NAME"
+    docker rm "$REDIS_CONTAINER_NAME"
 }
 
 # Function to start SAM local API
 start_sam_api() {
-    local START_CMD="sam local start-api -t serverless.yaml --host 127.0.0.1"
+    local START_CMD="sam local start-api -t dist/serverless.yaml --host 127.0.0.1"
 
     # If DOCKER_HOST is passed as an argument, prefix the START_CMD with it
     if [ -n "$1" ]; then

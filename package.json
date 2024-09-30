@@ -8,14 +8,11 @@
     "libs/*"
   ],
   "scripts": {
+    "dev": "nx run-many --target=dev --all",
     "build": "nx run-many --target=build --all",
     "format": "nx run-many --target=format --all",
     "lint": "nx run-many --target=lint --all",
-    "test": "nx run-many --target=test --all",
-    "affected:build": "nx affected --target=build",
-    "affected:format": "nx affected --target=format",
-    "affected:lint": "nx affected --target=lint",
-    "affected:test": "nx affected --target=test"
+    "test": "nx run-many --target=test --all"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
