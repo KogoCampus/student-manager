@@ -2,7 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
-import vpc from '../lib/import/vpc';
+
+import vpcImport from '../lib/import/vpc.decrypted.json';
 
 type ElasticCacheStackProps = cdk.StackProps;
 
@@ -16,11 +17,11 @@ export class ElasticCacheStack extends cdk.Stack {
 
     // Import the existing VPC
     this.vpc = ec2.Vpc.fromLookup(this, 'KogoVpc', {
-      vpcId: vpc.vpcId,
+      vpcId: vpcImport.vpcId,
     });
 
     // Use the private subnets from vpc.ts
-    const redisSubnets = [vpc.subnets.private.usWest2a, vpc.subnets.private.usWest2b, vpc.subnets.private.usWest2c];
+    const redisSubnets = [vpcImport.subnets.private.usWest2a, vpcImport.subnets.private.usWest2b, vpcImport.subnets.private.usWest2c];
 
     // Create a security group for the Redis cluster
     const redisSecurityGroup = new ec2.SecurityGroup(this, 'RedisSecurityGroup', {
@@ -28,11 +29,7 @@ export class ElasticCacheStack extends cdk.Stack {
     });
 
     // Allow inbound traffic on Redis port (6379) from the VPC
-    redisSecurityGroup.addIngressRule(
-      ec2.Peer.ipv4(this.vpc.vpcCidrBlock),
-      ec2.Port.tcp(6379),
-      'Allow Redis access from VPC',
-    );
+    redisSecurityGroup.addIngressRule(ec2.Peer.ipv4(this.vpc.vpcCidrBlock), ec2.Port.tcp(6379), 'Allow Redis access from VPC');
 
     // Create a subnet group for the Redis cluster
     const subnetGroup = new elasticache.CfnSubnetGroup(this, 'RedisSubnetGroup', {

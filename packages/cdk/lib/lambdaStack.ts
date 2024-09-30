@@ -4,10 +4,11 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import sesConfig from '../lib/import/ses';
-import { default as apigatewayProperties } from '../lib/import/apigateway';
-import { default as vpcImport } from '../lib/import/vpc';
-import cognitoProperties from '../lib/import/cognito';
+
+import sesImport from '../lib/import/ses.decrypted.json';
+import apigatewayImport from '../lib/import/apigateway.decrypted.json';
+import vpcImport from '../lib/import/vpc.decrypted.json';
+import cognitoImport from '../lib/import/cognito.decrypted.json';
 
 const nodeVersion = {
   lambaRuntime: lambda.Runtime.NODEJS_20_X,
@@ -23,15 +24,23 @@ export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
-    const env = this.node.tryGetContext('env') === 'production' ? 'production' : 'staging';
-    const cognitoEnvProperties = cognitoProperties[env];
-    const apigatewayEnvProperties = apigatewayProperties[env];
-
     const api = apigateway.RestApi.fromRestApiAttributes(this, 'ImportedApi', {
-      restApiId: apigatewayEnvProperties.restApiId,
-      rootResourceId: apigatewayEnvProperties.rootResourceId,
+      restApiId: apigatewayImport.restApiId,
+      rootResourceId: apigatewayImport.rootResourceId,
     });
     const studentResource = api.root.addResource('student');
+
+    // =================================================================
+    // Environment Variables
+    // =================================================================
+    const elasticCacheEnv = {
+      REDIS_ENDPOINT: props.redisEndpoint,
+      REDIS_PORT: props.redisPort,
+    };
+    const cognitoEnv = {
+      COGNITO_USER_POOL_ID: cognitoImport.userPoolId,
+      COGNITO_CLIENT_ID: cognitoImport.clientId,
+    };
 
     // =================================================================
     // Email Verification Lambda
@@ -45,8 +54,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'emailVerification.handler',
       vpc,
       environment: {
-        REDIS_ENDPOINT: props.redisEndpoint,
-        REDIS_PORT: props.redisPort,
+        ...elasticCacheEnv,
       },
     });
 
@@ -54,7 +62,7 @@ export class LambdaStack extends cdk.Stack {
     emailVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [sesConfig.sesIdentityArn],
+        resources: [sesImport.sesIdentityArn],
       }),
     );
 
@@ -71,8 +79,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'resendVerification.handler',
       vpc,
       environment: {
-        REDIS_ENDPOINT: props.redisEndpoint,
-        REDIS_PORT: props.redisPort,
+        ...elasticCacheEnv,
       },
     });
 
@@ -80,7 +87,7 @@ export class LambdaStack extends cdk.Stack {
     resendVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [sesConfig.sesIdentityArn],
+        resources: [sesImport.sesIdentityArn],
       }),
     );
 
@@ -97,9 +104,8 @@ export class LambdaStack extends cdk.Stack {
       handler: 'userRegistration.handler',
       vpc,
       environment: {
-        REDIS_ENDPOINT: props.redisEndpoint,
-        REDIS_PORT: props.redisPort,
-        COGNITO_USER_POOL_ID: cognitoEnvProperties.userPoolId,
+        ...elasticCacheEnv,
+        ...cognitoEnv,
       },
     });
 
@@ -107,7 +113,7 @@ export class LambdaStack extends cdk.Stack {
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser'],
-        resources: [cognitoEnvProperties.userPoolArn],
+        resources: [cognitoImport.userPoolArn],
       }),
     );
 
@@ -124,14 +130,13 @@ export class LambdaStack extends cdk.Stack {
       handler: 'signIn.handler',
       vpc,
       environment: {
-        COGNITO_USER_POOL_ID: cognitoEnvProperties.userPoolId,
-        COGNITO_CLIENT_ID: cognitoEnvProperties.clientId,
+        ...cognitoEnv,
       },
     });
     signInLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminRespondToAuthChallenge'],
-        resources: [cognitoEnvProperties.userPoolArn],
+        resources: [cognitoImport.userPoolArn],
       }),
     );
 
@@ -148,9 +153,8 @@ export class LambdaStack extends cdk.Stack {
       handler: 'passwordReset.handler',
       vpc,
       environment: {
-        COGNITO_USER_POOL_ID: cognitoEnvProperties.userPoolId,
-        REDIS_ENDPOINT: props.redisEndpoint,
-        REDIS_PORT: props.redisPort,
+        ...elasticCacheEnv,
+        ...cognitoEnv,
       },
     });
 
@@ -158,7 +162,7 @@ export class LambdaStack extends cdk.Stack {
     passwordResetLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminSetUserPassword', 'cognito-idp:ListUsers'],
-        resources: [cognitoEnvProperties.userPoolArn],
+        resources: [cognitoImport.userPoolArn],
       }),
     );
 
@@ -175,13 +179,13 @@ export class LambdaStack extends cdk.Stack {
       handler: 'authenticateUser.handler',
       vpc,
       environment: {
-        COGNITO_USER_POOL_ID: cognitoEnvProperties.userPoolId,
+        ...cognitoEnv,
       },
     });
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:GetUser'],
-        resources: [cognitoEnvProperties.userPoolArn],
+        resources: [cognitoImport.userPoolArn],
       }),
     );
 

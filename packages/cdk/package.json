@@ -6,8 +6,8 @@
     "student-manager": "dist/cdk/student-manager.js"
   },
   "scripts": {
-    "dev": "bash bin/local-sam.sh",
     "build": "node build.js",
+    "dev": "yarn build && bash sam/local-api.sh",
     "bootstrap": "yarn build && cdk bootstrap --context env=staging",
     "deploy": "yarn bootstrap && cdk deploy --all",
     "destroy": "cdk destroy --all",
@@ -15,13 +15,16 @@
     "test": "jest",
     "lint": "eslint lib/**/*.ts src/**/*.ts bin/**/*.ts",
     "format": "prettier .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "decrypt": "node decryptSecrets.js --directories ./lib/import ./sam --region us-west-2 --secret-name /stg/student-manager/secrets"
   },
   "devDependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.658.1",
     "@types/aws-lambda": "^8.10.145",
     "@types/js-yaml": "^4.0.9",
     "aws-cdk": "2.152.0",
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.24.0",
+    "yargs": "^17.7.2"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.658.1",

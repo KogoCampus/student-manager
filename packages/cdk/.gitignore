@@ -1,4 +1,4 @@
 .cdk.staging
 cdk.out
 
-.env
+**/*.decrypted*

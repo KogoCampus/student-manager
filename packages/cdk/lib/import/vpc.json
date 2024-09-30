@@ -1,0 +1,12 @@
+{
+  "vpcId": "secret:vpc.vpcId",
+  "vpcName": "secret:vpc.vpcName",
+  "subnets": {
+    "private": {
+      "usWest2a": "secret:vpc.subnets.private.a",
+      "usWest2b": "secret:vpc.subnets.private.b",
+      "usWest2c": "secret:vpc.subnets.private.c"
+    },
+    "public": {}
+  }
+}

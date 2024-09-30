@@ -10,6 +10,7 @@ serverless:
           REDIS_ENDPOINT: host.docker.internal
           REDIS_PORT: "63790"
           COGNITO_USER_POOL_ID: us-west-2_Onci94rlj
+          COGNITO_CLIENT_ID: your-cognito-client-id
       Events:
         UserRegistration:
           Type: Api

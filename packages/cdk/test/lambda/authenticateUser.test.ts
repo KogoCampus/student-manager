@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handler } from '../../src/lambda/authenticateUser';
-import { getUserDetailsFromAccessToken } from '../../src/utils/cognito';
+import { getUserDetailsFromAccessToken, refreshAccessToken } from '../../src/utils/cognito';
 import { getSchoolInfoByKey } from '../../src/utils/schoolInfo';
 import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
 
@@ -26,21 +26,33 @@ describe('authenticateUser handler', () => {
   });
 
   it('should return 400 if access token is missing', async () => {
-    const event = { headers: { Authorization: 'Bearer ' } };
+    const event = { headers: { Authorization: 'Bearer ' }, queryStringParameters: { grant_type: 'access_token' } };
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('Access token is missing', 400);
+    expect(errorResponse).toHaveBeenCalledWith('Token is missing', 400);
     expect(result).toBeUndefined();
   });
 
-  it('should return user details and full schoolInfo if authentication is successful', async () => {
+  it('should return 400 if grant_type is missing', async () => {
+    const event = { headers: { Authorization: 'Bearer validAccessToken' } };
+    const result = await handler(event as any, mockContext, mockCallback);
+    expect(errorResponse).toHaveBeenCalledWith('grant_type query parameter is required', 400);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return user details with schoolInfo when grant_type=access_token', async () => {
     const event = {
       headers: { Authorization: 'Bearer validAccessToken' },
+      queryStringParameters: { grant_type: 'access_token' },
     };
+
+    // Mock successful user details retrieval
     (getUserDetailsFromAccessToken as jest.Mock).mockResolvedValueOnce({
       username: 'testuser',
       email: 'test@school.edu',
       schoolKey: 'school123',
     });
+
+    // Mock successful school info retrieval
     (getSchoolInfoByKey as jest.Mock).mockReturnValueOnce({
       domain: 'school.edu',
       name: 'Test School',
@@ -48,6 +60,7 @@ describe('authenticateUser handler', () => {
     });
 
     const result = await handler(event as any, mockContext, mockCallback);
+
     expect(getUserDetailsFromAccessToken).toHaveBeenCalledWith('validAccessToken');
     expect(getSchoolInfoByKey).toHaveBeenCalledWith('school123');
     expect(successResponse).toHaveBeenCalledWith({
@@ -62,13 +75,48 @@ describe('authenticateUser handler', () => {
     expect(result).toBeUndefined();
   });
 
+  it('should return a new access token when grant_type=refresh_token', async () => {
+    const event = {
+      headers: { Authorization: 'Bearer validRefreshToken' },
+      queryStringParameters: { grant_type: 'refresh_token' },
+    };
+
+    // Mock successful refresh token flow
+    (refreshAccessToken as jest.Mock).mockResolvedValueOnce('newAccessToken');
+
+    const result = await handler(event as any, mockContext, mockCallback);
+
+    expect(refreshAccessToken).toHaveBeenCalledWith('validRefreshToken');
+    expect(successResponse).toHaveBeenCalledWith({
+      message: 'Access token refreshed successfully',
+      accessToken: 'newAccessToken',
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it('should return error if grant_type is invalid', async () => {
+    const event = {
+      headers: { Authorization: 'Bearer validAccessToken' },
+      queryStringParameters: { grant_type: 'invalid_grant_type' },
+    };
+
+    const result = await handler(event as any, mockContext, mockCallback);
+
+    expect(errorResponse).toHaveBeenCalledWith('Invalid grant_type provided', 400);
+    expect(result).toBeUndefined();
+  });
+
   it('should return exception response on error', async () => {
     const event = {
       headers: { Authorization: 'Bearer validAccessToken' },
+      queryStringParameters: { grant_type: 'access_token' },
     };
+
+    // Mock an error occurring
     (getUserDetailsFromAccessToken as jest.Mock).mockRejectedValueOnce(new Error('Cognito error'));
 
     const result = await handler(event as any, mockContext, mockCallback);
+
     expect(exceptionResponse).toHaveBeenCalledWith(new Error('Cognito error'));
     expect(result).toBeUndefined();
   });
