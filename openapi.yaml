@@ -1,0 +1,231 @@
+openapi: 3.0.0
+info:
+  title: Student Manager API
+  description: API for handling student accounts. i.e email verification, registration, etc
+  version: 1.0.0
+servers:
+  - url: https://api.staging.kogocampus.com
+    description: Delievered via AWS API Gateway
+paths:
+  /student/authenticate:
+    get:
+      summary: Authenticate user with either access_token or refresh_token
+      description: Authenticate a user using an access token or refresh the access
+        token using a refresh token.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token (access token or refresh token) for authentication.
+          schema:
+            type: string
+        - name: grant_type
+          in: query
+          required: true
+          description: The grant type, either access_token or refresh_token.
+          schema:
+            type: string
+            enum:
+              - access_token
+              - refresh_token
+      responses:
+        "200":
+          description: User authenticated successfully or access token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Access token refreshed successfully
+                  accessToken:
+                    type: string
+                    description: New access token (if grant_type=refresh_token)
+        "400":
+          description: Bad request - missing or invalid parameters
+        "500":
+          description: Internal server error
+  /student/verify-email:
+    post:
+      summary: Verify a student's email
+      description: Generates a verification code and sends it to the email provided.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student to verify.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verification email sent
+        "400":
+          description: Bad request - missing or invalid parameters
+        "500":
+          description: Internal server error
+  /student/password-reset:
+    post:
+      summary: Reset password for a student
+      description: Resets the password for a student after email verification code
+        validation.
+      requestBody:
+        description: The new password for the student
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword:
+                  type: string
+                  description: The new password for the student.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student.
+          schema:
+            type: string
+        - name: verificationCode
+          in: query
+          required: true
+          description: The verification code sent to the student's email.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password reset successfully
+        "400":
+          description: Bad request - missing or invalid parameters
+        "404":
+          description: Not found - user does not exist
+        "500":
+          description: Internal server error
+  /student/resend-verification:
+    post:
+      summary: Resend a verification code
+      description: Resends a verification code to the student's email.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verification email resent
+        "429":
+          description: Too many requests - please wait before resending
+        "500":
+          description: Internal server error
+  /student/signin:
+    post:
+      summary: Student Sign In
+      description: Authenticates a student with their username and password, returning
+        access, ID, and refresh tokens.
+      requestBody:
+        description: The username and password for the student sign-in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the student.
+                password:
+                  type: string
+                  description: The password of the student.
+      responses:
+        "200":
+          description: Student successfully authenticated and tokens returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully authenticated
+                  accessToken:
+                    type: string
+                    description: Access token for API authorization
+                  idToken:
+                    type: string
+                    description: ID token for user identification
+                  refreshToken:
+                    type: string
+                    description: Token used to refresh the access token
+        "400":
+          description: Bad request - missing or invalid parameters
+        "401":
+          description: Unauthorized - invalid username or password
+        "500":
+          description: Internal server error
+  /student/register:
+    post:
+      summary: Register a student
+      description: Registers a student after verification code validation and returns
+        authentication tokens.
+      requestBody:
+        description: The username and password for the student registration
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The desired username for the new student.
+                password:
+                  type: string
+                  description: The desired password for the new student.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student.
+          schema:
+            type: string
+        - name: verificationCode
+          in: query
+          required: true
+          description: The verification code sent to the student's email.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student successfully registered and tokens returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully created
+                  accessToken:
+                    type: string
+                    description: Access token for API authorization
+                  idToken:
+                    type: string
+                    description: ID token for user identification
+                  refreshToken:
+                    type: string
+                    description: Token used to refresh the access token
+        "400":
+          description: Bad request - missing or invalid parameters
+        "500":
+          description: Internal server error
