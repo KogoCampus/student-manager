@@ -7,7 +7,7 @@ on:
 
 jobs:
     build:
-        runs-on: ubuntu-22.04
+        runs-on: [ubuntu-latest]
 
         strategy:
             matrix:
@@ -49,8 +49,9 @@ jobs:
                 mkdir -p swagger  # Ensure the target directory exists
                 cp packages/cdk/dist/openapi.yaml swagger/openapi.yaml
 
-            - name: Deploy to GitHub Pages
+            - name: Build and Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v3
               with:
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-                publish_dir: swagger
+                  deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+                  publish_dir: ./src/main/swagger-ui
+                  publish_branch: gh-pages
