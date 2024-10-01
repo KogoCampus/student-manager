@@ -26,19 +26,19 @@ jobs:
         with:
           cmd: install
 
-      - name: Decrypt secrets for CDK
-        working-directory: packages/cdk
-        run: node decryptSecrets.js --directories ./lib/import ./sam --region us-west-1 --secret-name /prod/student-manager/secrets
+      - name: Run tests
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: test
 
       - name: Build the project
         uses: borales/actions-yarn@v4
         with:
           cmd: build
-
-      - name: Run tests
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: test
+          
+      - name: Decrypt secrets for CDK
+        working-directory: packages/cdk
+        run: node decryptSecrets.js --directories ./lib/import ./sam --region us-west-1 --secret-name /prod/student-manager/secrets  
 
       - name: CDK Bootstrap
         working-directory: packages/cdk

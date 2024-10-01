@@ -8,8 +8,8 @@
   "scripts": {
     "build": "yarn decrypt && node build.js",
     "dev": "yarn build && bash sam/local-api.sh",
-    "bootstrap": "yarn build && cdk bootstrap --context env=staging",
-    "deploy": "yarn bootstrap && cdk deploy --all",
+    "bootstrap": "cdk bootstrap --context env=staging",
+    "deploy": "cdk deploy --all",
     "destroy": "cdk destroy --all",
     "cdk": "cdk",
     "test": "jest",

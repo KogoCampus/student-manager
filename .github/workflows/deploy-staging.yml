@@ -29,20 +29,20 @@ jobs:
         with:
           cmd: install
 
-      - name: Decrypt secrets for CDK
+      - name: Run tests
         uses: borales/actions-yarn@v4
         with:
-          cmd: workspace @student-manager/cdk decrypt
+          cmd: test
 
       - name: Build the project
         uses: borales/actions-yarn@v4
         with:
           cmd: build
-        
-      - name: Run tests
+
+      - name: CDK Bootstrap
         uses: borales/actions-yarn@v4
         with:
-          cmd: test
+          cmd: workspace @student-manager/cdk bootstrap
 
       - name: CDK Deploy
         uses: borales/actions-yarn@v4
