@@ -1,6 +1,0 @@
-{
-    "sesIdentity": "secret:ses.sesIdentity",
-    "sesIdentityType": "secret:ses.sesIdentityType",
-    "sesIdentityRegion": "secret:ses.sesIdentityRegion",
-    "sesIdentityArn": "secret:ses.sesIdentityArn"
-}

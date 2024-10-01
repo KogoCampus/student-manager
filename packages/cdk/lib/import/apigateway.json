@@ -1,7 +1,0 @@
-{
-  "restApiId": "secret:apigateway.restApiId",
-  "rootResourceId": "secret:apigateway.rootResourceId",
-  "apiGatewayName": "secret:apigateway.apiGatewayName",
-  "apiGatewayRegion": "secret:apigateway.apiGatewayRegion",
-  "apiGatewayArn": "secret:apigateway.apiGatewayArn"
-}

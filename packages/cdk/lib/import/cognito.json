@@ -1,7 +1,0 @@
-{
-  "userPoolName": "secret:cognito.userPoolName",
-  "userPoolArn": "secret:cognito.userPoolArn",
-  "userPoolId": "secret:cognito.userPoolId",
-  "clientId": "secret:cognito.clientId",
-  "region": "secret:cognito.region"
-}
