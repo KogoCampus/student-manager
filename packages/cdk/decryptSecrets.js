@@ -26,10 +26,8 @@ const argv = yargs
   .help()
   .alias('help', 'h').argv;
 
-// Initialize the Secrets Manager client
 const client = new SecretsManagerClient({ region: argv.region });
 
-// Function to fetch the secret with key-value pairs from AWS Secrets Manager
 async function fetchSecrets(secretName) {
   try {
     const command = new GetSecretValueCommand({ SecretId: secretName });
@@ -44,7 +42,6 @@ async function fetchSecrets(secretName) {
   }
 }
 
-// Function to recursively map secrets to the JSON object
 function mapSecretsToJSON(obj, secrets) {
   for (const key in obj) {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -63,7 +60,6 @@ function mapSecretsToJSON(obj, secrets) {
   }
 }
 
-// Function to process a single .json file and create a .decrypted.json file
 async function decryptEnvFile(filePath, secrets) {
   const decryptedFilePath = filePath.replace('.json', '.decrypted.json');
 
@@ -84,7 +80,6 @@ async function decryptEnvFile(filePath, secrets) {
   console.log(`Decrypted ${filePath} written to ${decryptedFilePath}`);
 }
 
-// Function to scan directories and decrypt .json files
 async function decryptSecretsInDirectories(directories, secrets) {
   for (const dir of directories) {
     const files = fs.readdirSync(dir);
@@ -98,7 +93,6 @@ async function decryptSecretsInDirectories(directories, secrets) {
   }
 }
 
-// Run the decryption process
 fetchSecrets(argv['secret-name'])
   .then(secrets => decryptSecretsInDirectories(argv.directories, secrets))
   .then(() => console.log('Decryption process completed'))

@@ -5,13 +5,13 @@ import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 import { isDesignatedSchoolEmail } from '../utils/schoolInfo';
 
-import sesImport from '../../lib/import/ses.decrypted.json';
+import awsImport from '../../lib/awsImport.decrypted.json';
 
 // Constants
 const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)
 
 // SES Client
-const SES = new SESClient({ region: sesImport.sesIdentityRegion });
+const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
   try {

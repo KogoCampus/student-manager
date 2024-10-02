@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 
-import vpcImport from '../lib/import/vpc.decrypted.json';
+import awsImport from '../lib/awsImport.decrypted.json';
 
 type ElasticCacheStackProps = cdk.StackProps;
 
@@ -17,11 +17,15 @@ export class ElasticCacheStack extends cdk.Stack {
 
     // Import the existing VPC
     this.vpc = ec2.Vpc.fromLookup(this, 'KogoVpc', {
-      vpcId: vpcImport.vpcId,
+      vpcId: awsImport.vpc.vpcId,
     });
 
     // Use the private subnets from vpc.ts
-    const redisSubnets = [vpcImport.subnets.private.usWest2a, vpcImport.subnets.private.usWest2b, vpcImport.subnets.private.usWest2c];
+    const redisSubnets = [
+      awsImport.vpc.subnets.private.usWest2a,
+      awsImport.vpc.subnets.private.usWest2b,
+      awsImport.vpc.subnets.private.usWest2c,
+    ];
 
     // Create a security group for the Redis cluster
     const redisSecurityGroup = new ec2.SecurityGroup(this, 'RedisSecurityGroup', {

@@ -5,10 +5,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
-import sesImport from '../lib/import/ses.decrypted.json';
-import apigatewayImport from '../lib/import/apigateway.decrypted.json';
-import vpcImport from '../lib/import/vpc.decrypted.json';
-import cognitoImport from '../lib/import/cognito.decrypted.json';
+import awsImport from '../lib/awsImport.decrypted.json';
 
 const nodeVersion = {
   lambaRuntime: lambda.Runtime.NODEJS_20_X,
@@ -25,8 +22,8 @@ export class LambdaStack extends cdk.Stack {
     super(scope, id, props);
 
     const api = apigateway.RestApi.fromRestApiAttributes(this, 'ImportedApi', {
-      restApiId: apigatewayImport.restApiId,
-      rootResourceId: apigatewayImport.rootResourceId,
+      restApiId: awsImport.apigateway.restApiId,
+      rootResourceId: awsImport.apigateway.rootResourceId,
     });
     const studentResource = api.root.addResource('student');
 
@@ -38,15 +35,15 @@ export class LambdaStack extends cdk.Stack {
       REDIS_PORT: props.redisPort,
     };
     const cognitoEnv = {
-      COGNITO_USER_POOL_ID: cognitoImport.userPoolId,
-      COGNITO_CLIENT_ID: cognitoImport.clientId,
+      COGNITO_USER_POOL_ID: awsImport.cognito.userPoolId,
+      COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
 
     // =================================================================
     // Email Verification Lambda
     // =================================================================
-    const vpc = ec2.Vpc.fromLookup(this, vpcImport.vpcName, {
-      vpcId: vpcImport.vpcId,
+    const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
+      vpcId: awsImport.vpc.vpcId,
     });
     const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
       runtime: nodeVersion.lambaRuntime,
@@ -62,7 +59,7 @@ export class LambdaStack extends cdk.Stack {
     emailVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [sesImport.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn],
       }),
     );
 
@@ -87,7 +84,7 @@ export class LambdaStack extends cdk.Stack {
     resendVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [sesImport.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn],
       }),
     );
 
@@ -113,7 +110,7 @@ export class LambdaStack extends cdk.Stack {
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser'],
-        resources: [cognitoImport.userPoolArn],
+        resources: [awsImport.cognito.userPoolArn],
       }),
     );
 
@@ -136,7 +133,7 @@ export class LambdaStack extends cdk.Stack {
     signInLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminRespondToAuthChallenge'],
-        resources: [cognitoImport.userPoolArn],
+        resources: [awsImport.cognito.userPoolArn],
       }),
     );
 
@@ -162,7 +159,7 @@ export class LambdaStack extends cdk.Stack {
     passwordResetLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminSetUserPassword', 'cognito-idp:ListUsers'],
-        resources: [cognitoImport.userPoolArn],
+        resources: [awsImport.cognito.userPoolArn],
       }),
     );
 
@@ -185,7 +182,7 @@ export class LambdaStack extends cdk.Stack {
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:GetUser'],
-        resources: [cognitoImport.userPoolArn],
+        resources: [awsImport.cognito.userPoolArn],
       }),
     );
 

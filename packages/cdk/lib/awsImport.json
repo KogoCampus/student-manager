@@ -1,0 +1,34 @@
+{
+    "apigateway": {
+        "restApiId": "secret:apigateway.restApiId",
+        "rootResourceId": "secret:apigateway.rootResourceId",
+        "apiGatewayName": "secret:apigateway.apiGatewayName",
+        "apiGatewayRegion": "secret:apigateway.apiGatewayRegion",
+        "apiGatewayArn": "secret:apigateway.apiGatewayArn"
+    },
+    "cognito": {
+        "userPoolName": "secret:cognito.userPoolName",
+        "userPoolArn": "secret:cognito.userPoolArn",
+        "userPoolId": "secret:cognito.userPoolId",
+        "clientId": "secret:cognito.clientId",
+        "region": "secret:cognito.region"
+    },
+    "ses": {
+        "sesIdentity": "secret:ses.sesIdentity",
+        "sesIdentityType": "secret:ses.sesIdentityType",
+        "sesIdentityRegion": "secret:ses.sesIdentityRegion",
+        "sesIdentityArn": "secret:ses.sesIdentityArn"
+    },
+    "vpc": {
+        "vpcId": "secret:vpc.vpcId",
+        "vpcName": "secret:vpc.vpcName",
+        "subnets": {
+          "private": {
+            "usWest2a": "secret:vpc.subnets.private.a",
+            "usWest2b": "secret:vpc.subnets.private.b",
+            "usWest2c": "secret:vpc.subnets.private.c"
+          },
+          "public": {}
+        }
+    }
+}

@@ -4,14 +4,14 @@ import { successResponse, errorResponse, exceptionResponse } from '../utils/lamb
 import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 
-import sesImport from '../../lib/import/ses.decrypted.json';
+import awsImport from '../../lib/awsImport.decrypted.json';
 
 // Constants
 const EXPIRATION_TIME = 900; // 15 minutes for the verification code expiry
 const RESEND_WAIT_TIME = 30; // 30 seconds wait time for resending the code
 
 // SES Client
-const SES = new SESClient({ region: sesImport.sesIdentityRegion });
+const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
   try {
