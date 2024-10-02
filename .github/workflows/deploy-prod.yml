@@ -53,4 +53,4 @@ jobs:
 
       - name: CDK Deploy Production
         working-directory: packages/cdk
-        run: cdk deploy --all --context env=production
+        run: cdk deploy --all --context env=production --require-approval never

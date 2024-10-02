@@ -59,4 +59,4 @@ jobs:
       - name: CDK Deploy
         uses: borales/actions-yarn@v4
         with:
-          cmd: workspace @student-manager/cdk deploy
+          cmd: workspace @student-manager/cdk deploy --require-approval never
