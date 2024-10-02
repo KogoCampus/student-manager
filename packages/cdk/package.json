@@ -6,7 +6,7 @@
     "student-manager": "dist/cdk/student-manager.js"
   },
   "scripts": {
-    "build": "yarn decrypt && node build.js",
+    "build": "node build.js",
     "dev": "yarn build && bash sam/local-api.sh",
     "bootstrap": "cdk bootstrap --context env=staging",
     "deploy": "cdk deploy --all",
