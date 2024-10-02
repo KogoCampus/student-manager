@@ -4,7 +4,7 @@ import { successResponse, errorResponse, exceptionResponse } from '../utils/lamb
 import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 
-import awsImport from '../../lib/awsImport.decrypted.json';
+import awsImport from '../../secrets/awsImport.decrypted.json';
 
 // Constants
 const EXPIRATION_TIME = 900; // 15 minutes for the verification code expiry

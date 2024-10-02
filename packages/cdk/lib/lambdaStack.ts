@@ -5,7 +5,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
-import awsImport from '../lib/awsImport.decrypted.json';
+import awsImport from '../secrets/awsImport.decrypted.json';
 
 const nodeVersion = {
   lambaRuntime: lambda.Runtime.NODEJS_20_X,

@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 
-import awsImport from '../lib/awsImport.decrypted.json';
+import awsImport from '../secrets/awsImport.decrypted.json';
 
 type ElasticCacheStackProps = cdk.StackProps;
 

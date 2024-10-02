@@ -35,7 +35,7 @@ start_redis() {
 }
 
 start_sam_api() {
-    local START_CMD="sam local start-api -t dist/serverless.yaml --env-vars sam/.env.decrypted.json --host 127.0.0.1"
+    local START_CMD="sam local start-api -t dist/serverless.yaml --env-vars secrets/sam.env.decrypted.json --host 127.0.0.1"
 
     # If DOCKER_HOST is passed as an argument, prefix the START_CMD with it
     if [ -n "$1" ]; then

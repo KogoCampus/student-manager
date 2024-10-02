@@ -5,7 +5,7 @@ import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 import { isDesignatedSchoolEmail } from '../utils/schoolInfo';
 
-import awsImport from '../../lib/awsImport.decrypted.json';
+import awsImport from '../../secrets/awsImport.decrypted.json';
 
 // Constants
 const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)

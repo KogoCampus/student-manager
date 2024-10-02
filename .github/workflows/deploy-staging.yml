@@ -32,14 +32,14 @@ jobs:
           aws configure set default.region us-west-2
         shell: bash
 
-      - name: Decrypt secrets for CDK
-        working-directory: packages/cdk
-        run: node decryptSecrets.js --directories ./lib ./sam --region us-west-2 --secret-name /stg/student-manager/secrets
-
       - name: Install dependencies
         uses: borales/actions-yarn@v4
         with:
           cmd: install
+
+      - name: Decrypt secrets for CDK
+        working-directory: packages/cdk
+        run: node decryptSecrets.js --directories ./lib ./sam --region us-west-2 --secret-name /stg/student-manager/secrets
 
       - name: Run tests
         uses: borales/actions-yarn@v4
