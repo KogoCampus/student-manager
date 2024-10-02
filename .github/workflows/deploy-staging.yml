@@ -39,7 +39,7 @@ jobs:
 
       - name: Decrypt secrets for CDK
         working-directory: packages/cdk
-        run: node decryptSecrets.js --directories ./lib ./sam --region us-west-2 --secret-name /stg/student-manager/secrets
+        run: node decryptSecrets.js --directories ./secrets --region us-west-2 --secret-name /stg/student-manager/secrets
 
       - name: Run tests
         uses: borales/actions-yarn@v4
