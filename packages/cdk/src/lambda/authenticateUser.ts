@@ -27,17 +27,27 @@ export const handler: APIGatewayProxyHandler = async event => {
         const schoolInfo = getSchoolInfoByKey(schoolKey);
 
         return successResponse({
-          username: userDetails.username,
-          email: userDetails.email,
-          schoolInfo: schoolInfo || 'School information not found',
+          userdata: {
+            username: userDetails.username,
+            email: userDetails.email,
+            schoolInfo: schoolInfo || 'School information not found',
+          }
         });
       }
       case 'refresh_token': {
         const newAccessToken = await refreshAccessToken(token);
+        const userDetails = await getUserDetailsFromAccessToken(newAccessToken); // Fetching user details again for consistency
+        const schoolKey = userDetails.schoolKey;
+        const schoolInfo = getSchoolInfoByKey(schoolKey);
 
         return successResponse({
+          userdata: {
+            username: userDetails.username,
+            email: userDetails.email,
+            schoolInfo: schoolInfo || 'School information not found',
+          },
+          access_token: newAccessToken,
           message: 'Access token refreshed successfully',
-          accessToken: newAccessToken,
         });
       }
       default:

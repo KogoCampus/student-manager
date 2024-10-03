@@ -43,14 +43,44 @@ openapi:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: "Access token refreshed successfully"
-                    accessToken:
-                      type: string
-                      description: New access token (if grant_type=refresh_token)
+                  oneOf:
+                    - type: object
+                      description: Response when grant_type is access_token
+                      properties:
+                        userdata:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: "johndoe"
+                            email:
+                              type: string
+                              example: "johndoe@example.com"
+                            schoolInfo:
+                              type: string
+                              example: "School information not found"
+                    - type: object
+                      description: Response when grant_type is refresh_token
+                      properties:
+                        userdata:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: "johndoe"
+                            email:
+                              type: string
+                              example: "johndoe@example.com"
+                            schoolInfo:
+                              type: string
+                              example: "School information not found"
+                        access_token:
+                          type: string
+                          description: New access token
+                          example: "newAccessToken"
+                        message:
+                          type: string
+                          example: "Access token refreshed successfully"
           '400':
             description: Bad request - missing or invalid parameters
           '500':

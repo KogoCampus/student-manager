@@ -64,18 +64,20 @@ describe('authenticateUser handler', () => {
     expect(getUserDetailsFromAccessToken).toHaveBeenCalledWith('validAccessToken');
     expect(getSchoolInfoByKey).toHaveBeenCalledWith('school123');
     expect(successResponse).toHaveBeenCalledWith({
-      username: 'testuser',
-      email: 'test@school.edu',
-      schoolInfo: {
-        domain: 'school.edu',
-        name: 'Test School',
-        shortenedName: 'TS',
+      userdata: {
+        username: 'testuser',
+        email: 'test@school.edu',
+        schoolInfo: {
+          domain: 'school.edu',
+          name: 'Test School',
+          shortenedName: 'TS',
+        },
       },
     });
     expect(result).toBeUndefined();
   });
 
-  it('should return a new access token when grant_type=refresh_token', async () => {
+  it('should return user details and a new access token when grant_type=refresh_token', async () => {
     const event = {
       headers: { Authorization: 'Bearer validRefreshToken' },
       queryStringParameters: { grant_type: 'refresh_token' },
@@ -84,12 +86,36 @@ describe('authenticateUser handler', () => {
     // Mock successful refresh token flow
     (refreshAccessToken as jest.Mock).mockResolvedValueOnce('newAccessToken');
 
+    // Mock successful user details retrieval after refreshing token
+    (getUserDetailsFromAccessToken as jest.Mock).mockResolvedValueOnce({
+      username: 'testuser',
+      email: 'test@school.edu',
+      schoolKey: 'school123',
+    });
+
+    // Mock successful school info retrieval
+    (getSchoolInfoByKey as jest.Mock).mockReturnValueOnce({
+      domain: 'school.edu',
+      name: 'Test School',
+      shortenedName: 'TS',
+    });
+
     const result = await handler(event as any, mockContext, mockCallback);
 
     expect(refreshAccessToken).toHaveBeenCalledWith('validRefreshToken');
+    expect(getUserDetailsFromAccessToken).toHaveBeenCalledWith('newAccessToken');
     expect(successResponse).toHaveBeenCalledWith({
+      userdata: {
+        username: 'testuser',
+        email: 'test@school.edu',
+        schoolInfo: {
+          domain: 'school.edu',
+          name: 'Test School',
+          shortenedName: 'TS',
+        },
+      },
+      access_token: 'newAccessToken',
       message: 'Access token refreshed successfully',
-      accessToken: 'newAccessToken',
     });
     expect(result).toBeUndefined();
   });
@@ -112,7 +138,6 @@ describe('authenticateUser handler', () => {
       queryStringParameters: { grant_type: 'access_token' },
     };
 
-    // Mock an error occurring
     (getUserDetailsFromAccessToken as jest.Mock).mockRejectedValueOnce(new Error('Cognito error'));
 
     const result = await handler(event as any, mockContext, mockCallback);
