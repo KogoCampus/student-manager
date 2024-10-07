@@ -2,10 +2,13 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
+import { SecurityGroupStack } from './securitygroupStack';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
-type ElasticCacheStackProps = cdk.StackProps;
+interface ElasticCacheStackProps extends cdk.StackProps {
+  securityGroupStack: SecurityGroupStack;
+}
 
 export class ElasticCacheStack extends cdk.Stack {
   public readonly redisEndpoint: string;
@@ -27,14 +30,6 @@ export class ElasticCacheStack extends cdk.Stack {
       awsImport.vpc.subnets.private.usWest2c,
     ];
 
-    // Create a security group for the Redis cluster
-    const redisSecurityGroup = new ec2.SecurityGroup(this, 'RedisSecurityGroup', {
-      vpc: this.vpc,
-    });
-
-    // Allow inbound traffic on Redis port (6379) from the VPC
-    redisSecurityGroup.addIngressRule(ec2.Peer.ipv4(this.vpc.vpcCidrBlock), ec2.Port.tcp(6379), 'Allow Redis access from VPC');
-
     // Create a subnet group for the Redis cluster
     const subnetGroup = new elasticache.CfnSubnetGroup(this, 'RedisSubnetGroup', {
       description: 'Subnet group for Redis cache in private subnets',
@@ -46,7 +41,7 @@ export class ElasticCacheStack extends cdk.Stack {
       engine: 'redis',
       cacheNodeType: 'cache.t3.micro', // Small serverless instance
       numCacheNodes: 1,
-      vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
+      vpcSecurityGroupIds: [props.securityGroupStack.elasticacheSecurityGroup.securityGroupId],
       cacheSubnetGroupName: subnetGroup.ref,
     });
 

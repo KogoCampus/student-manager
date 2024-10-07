@@ -31,7 +31,7 @@ export const handler: APIGatewayProxyHandler = async event => {
             username: userDetails.username,
             email: userDetails.email,
             schoolInfo: schoolInfo || 'School information not found',
-          }
+          },
         });
       }
       case 'refresh_token': {

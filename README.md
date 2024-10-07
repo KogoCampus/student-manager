@@ -9,6 +9,9 @@ lib/* --- Shared libraries used across different packages, including utility fun
 ```
 
 ## Getting Started
+Install AWS SAM CLI  
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html  
+
 To turn on all development environment instances across packages (including CDK, UI, and others), you can run:
 ```
 yarn dev

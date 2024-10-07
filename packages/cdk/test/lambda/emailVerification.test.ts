@@ -35,7 +35,7 @@ describe('emailVerification handler', () => {
     (buildEmailParams as jest.Mock).mockReturnValue({
       Destination: { ToAddresses: ['test@school.edu'] },
       Message: { Subject: { Data: 'Subject' }, Body: { Text: { Data: 'Test body' } } },
-      Source: 'no-reply@kogocampus.com',
+      Source: 'welcome@kogocampus.com',
     });
   });
 

@@ -32,7 +32,7 @@ export const handler: APIGatewayProxyHandler = async event => {
     // Set verification code with expiry in Redis
     await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
 
-    const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'no-reply@kogocampus.com');
+    const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'welcome@kogocampus.com');
     const command = new SendEmailCommand(emailParams);
     await SES.send(command);
 

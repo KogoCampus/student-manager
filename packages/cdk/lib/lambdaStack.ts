@@ -4,6 +4,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import { Duration } from 'aws-cdk-lib';
+import { SecurityGroupStack } from './securitygroupStack';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
@@ -15,6 +17,7 @@ const nodeVersion = {
 interface LambdaStackProps extends cdk.StackProps {
   redisEndpoint: string;
   redisPort: string;
+  securityGroupStack: SecurityGroupStack;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -39,17 +42,34 @@ export class LambdaStack extends cdk.Stack {
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
 
-    // =================================================================
-    // Email Verification Lambda
-    // =================================================================
     const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
       vpcId: awsImport.vpc.vpcId,
     });
-    const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
+
+    const publicSubnets = [
+      awsImport.vpc.subnets.public.usWest2a,
+      awsImport.vpc.subnets.public.usWest2b,
+      awsImport.vpc.subnets.public.usWest2c,
+    ];
+
+    const defaultLambdaProps = {
       runtime: nodeVersion.lambaRuntime,
+      timeout: Duration.seconds(15),
+      vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC,
+        subnets: publicSubnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
+      },
+      securityGroups: [props.securityGroupStack.lambdaSecurityGroup], // Use Lambda security group
+    };
+
+    // =================================================================
+    // Email Verification Lambda
+    // =================================================================
+    const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'emailVerification.handler',
-      vpc,
       environment: {
         ...elasticCacheEnv,
       },
@@ -71,10 +91,9 @@ export class LambdaStack extends cdk.Stack {
     // Resend Verification Lambda
     // =================================================================
     const resendVerificationLambda = new lambda.Function(this, 'ResendVerificationHandler', {
-      runtime: nodeVersion.lambaRuntime,
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'resendVerification.handler',
-      vpc,
       environment: {
         ...elasticCacheEnv,
       },
@@ -96,10 +115,9 @@ export class LambdaStack extends cdk.Stack {
     // User Registration Lambda
     // =================================================================
     const userRegistrationLambda = new lambda.Function(this, 'UserRegistrationHandler', {
-      runtime: nodeVersion.lambaRuntime,
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'userRegistration.handler',
-      vpc,
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
@@ -122,10 +140,9 @@ export class LambdaStack extends cdk.Stack {
     // Sign In Lambda
     // =================================================================
     const signInLambda = new lambda.Function(this, 'SignInHandler', {
-      runtime: nodeVersion.lambaRuntime,
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'signIn.handler',
-      vpc,
       environment: {
         ...cognitoEnv,
       },
@@ -145,10 +162,9 @@ export class LambdaStack extends cdk.Stack {
     // Password Reset Lambda
     // =================================================================
     const passwordResetLambda = new lambda.Function(this, 'PasswordResetHandler', {
-      runtime: nodeVersion.lambaRuntime,
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'passwordReset.handler',
-      vpc,
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
@@ -171,10 +187,9 @@ export class LambdaStack extends cdk.Stack {
     // Authenticate User Lambda
     // =================================================================
     const authenticateUserLambda = new lambda.Function(this, 'AuthenticateUserHandler', {
-      runtime: nodeVersion.lambaRuntime,
+      ...defaultLambdaProps,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'authenticateUser.handler',
-      vpc,
       environment: {
         ...cognitoEnv,
       },

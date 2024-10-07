@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
+import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 import { LambdaStack } from '../lib/lambdaStack';
 import { ElasticCacheStack } from '../lib/elasticacheStack';
-import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
+import { SecurityGroupStack } from '../lib/securitygroupStack';
 
 const app = new cdk.App();
 
@@ -29,16 +30,21 @@ async function getAccountIdAndRegion() {
 (async () => {
   const { accountId, region } = await getAccountIdAndRegion();
 
-  // Deploy ElastiCache Redis Stack
-  const redisStack = new ElasticCacheStack(app, stackName('ElasticCache'), {
+  const securityGroupStack = new SecurityGroupStack(app, stackName('SecurityGroup'), {
     env: { account: accountId, region },
   });
 
-  // Deploy Lambda Stack
+  const redisStack = new ElasticCacheStack(app, stackName('ElasticCache'), {
+    env: { account: accountId, region },
+    securityGroupStack,
+  });
+  redisStack.addDependency(securityGroupStack);
+
   const lambdaStack = new LambdaStack(app, stackName('Lambda'), {
     env: { account: accountId, region },
     redisEndpoint: redisStack.redisEndpoint,
     redisPort: redisStack.redisPort,
+    securityGroupStack,
   });
   lambdaStack.addDependency(redisStack);
 })();

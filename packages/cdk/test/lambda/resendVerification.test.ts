@@ -27,7 +27,7 @@ describe('resendVerification handler', () => {
     (buildEmailParams as jest.Mock).mockReturnValue({
       Destination: { ToAddresses: ['test@school.edu'] },
       Message: { Subject: { Data: 'Verification Code' }, Body: { Text: { Data: 'Your code is 123456' } } },
-      Source: 'no-reply@kogocampus.com',
+      Source: 'welcome@kogocampus.com',
     });
   });
 
