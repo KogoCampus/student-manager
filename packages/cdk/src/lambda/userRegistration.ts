@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
 import { RedisClient } from '../utils/redis';
-import { createUserInCognito } from '../utils/cognito';
+import { createUserInCognito, doesUserExistByEmail } from '../utils/cognito';
 import { getSchoolKeyByEmail } from '../utils/schoolInfo';
 
 export const handler: APIGatewayProxyHandler = async event => {
@@ -33,6 +33,12 @@ export const handler: APIGatewayProxyHandler = async event => {
 
     // Verification successful, delete the code from Redis
     await redis.delete(email);
+
+    // Check if a user with the same email already exists
+    const doesUserExist = await doesUserExistByEmail(email);
+    if (doesUserExist) {
+      return errorResponse('User already exists with the provided email', 409);
+    }
 
     const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, username, password, schoolKey);
     return successResponse({

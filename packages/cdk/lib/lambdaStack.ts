@@ -139,7 +139,12 @@ export class LambdaStack extends cdk.Stack {
     // Add IAM policy
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser'],
+        actions: [
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminDisableUser',
+          'cognito-idp:AdminSetUserPassword',
+          'cognito-idp:AdminInitiateAuth',
+        ],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
@@ -215,7 +220,7 @@ export class LambdaStack extends cdk.Stack {
     // Add IAM policy
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['cognito-idp:GetUser'],
+        actions: ['cognito-idp:GetUser', 'cognito-idp:AdminInitiateAuth'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
@@ -223,6 +228,6 @@ export class LambdaStack extends cdk.Stack {
 
     // path: /student/authenticate
     const authenticateUserIntegration = new apigateway.LambdaIntegration(authenticateUserLambda);
-    studentResource.addResource('authenticate').addMethod('POST', authenticateUserIntegration);
+    studentResource.addResource('authenticate').addMethod('GET', authenticateUserIntegration);
   }
 }

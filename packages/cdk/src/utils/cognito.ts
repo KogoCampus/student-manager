@@ -2,7 +2,6 @@ import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
   AdminSetUserPasswordCommand,
-  AdminDeleteUserCommand,
   AdminInitiateAuthCommand,
   GetUserCommand,
   AuthenticationResultType,
@@ -36,7 +35,6 @@ export async function createUserInCognito(
 ): Promise<AuthenticationResultType> {
   const { cognito, clientId, userPoolId } = getCognitoClient();
 
-  // Create the user in Cognito (without sending a temporary password email)
   const createUserCommand = new AdminCreateUserCommand({
     UserPoolId: userPoolId,
     Username: username,
@@ -48,56 +46,34 @@ export async function createUserInCognito(
     ],
   });
 
-  try {
-    await cognito.send(createUserCommand);
+  const setPasswordCommand = new AdminSetUserPasswordCommand({
+    UserPoolId: userPoolId,
+    Username: username,
+    Password: password,
+    Permanent: true,
+  });
 
-    // Set the password to permanent
-    const setPasswordCommand = new AdminSetUserPasswordCommand({
-      UserPoolId: userPoolId,
-      Username: username,
-      Password: password,
-      Permanent: true,
-    });
+  // Initiate authentication to get tokens (access, ID, refresh)
+  const authCommand = new AdminInitiateAuthCommand({
+    UserPoolId: userPoolId,
+    ClientId: clientId,
+    AuthFlow: 'ADMIN_NO_SRP_AUTH',
+    AuthParameters: {
+      USERNAME: username,
+      PASSWORD: password,
+    },
+  });
 
-    await cognito.send(setPasswordCommand);
+  await cognito.send(createUserCommand);
+  await cognito.send(setPasswordCommand);
 
-    // Initiate authentication to get tokens (access, ID, refresh)
-    const authCommand = new AdminInitiateAuthCommand({
-      UserPoolId: userPoolId,
-      ClientId: clientId,
-      AuthFlow: 'ADMIN_NO_SRP_AUTH',
-      AuthParameters: {
-        USERNAME: username,
-        PASSWORD: password,
-      },
-    });
+  const authResponse = await cognito.send(authCommand);
 
-    const authResponse = await cognito.send(authCommand);
-
-    if (authResponse.AuthenticationResult) {
-      const { AccessToken, IdToken, RefreshToken } = authResponse.AuthenticationResult;
-      return { AccessToken, IdToken, RefreshToken };
-    } else {
-      throw new Error('Failed to authenticate the newly created user');
-    }
-  } catch (error) {
-    // If an error occurs, delete the user to clean up
-    if (error instanceof Error) {
-      console.error(`Failed to set password for user ${username}: ${error.message}`);
-
-      const deleteUserCommand = new AdminDeleteUserCommand({
-        UserPoolId: userPoolId,
-        Username: username,
-      });
-      try {
-        await cognito.send(deleteUserCommand);
-        console.log(`User ${username} deleted due to error.`);
-      } catch (deleteError) {
-        console.error(`Failed to delete user ${username}: ${deleteError}`);
-      }
-    }
-
-    throw new Error(`Failed to create user in Cognito: ${error}`);
+  if (authResponse.AuthenticationResult) {
+    const { AccessToken, IdToken, RefreshToken } = authResponse.AuthenticationResult;
+    return { AccessToken, IdToken, RefreshToken };
+  } else {
+    throw new Error('Failed to authenticate the newly created user');
   }
 }
 
@@ -114,17 +90,12 @@ export async function authenticateUser(username: string, password: string): Prom
     },
   });
 
-  try {
-    const authResponse = await cognito.send(authCommand);
+  const authResponse = await cognito.send(authCommand);
 
-    if (authResponse.AuthenticationResult) {
-      const { AccessToken, IdToken, RefreshToken } = authResponse.AuthenticationResult;
-      return { AccessToken, IdToken, RefreshToken };
-    } else {
-      throw new Error('Authentication failed');
-    }
-  } catch (error) {
-    console.error(`Failed to authenticate user ${username}: ${error}`);
+  if (authResponse.AuthenticationResult) {
+    const { AccessToken, IdToken, RefreshToken } = authResponse.AuthenticationResult;
+    return { AccessToken, IdToken, RefreshToken };
+  } else {
     throw new Error('Authentication failed');
   }
 }
@@ -132,28 +103,23 @@ export async function authenticateUser(username: string, password: string): Prom
 export async function getUserDetailsFromAccessToken(accessToken: string): Promise<{ username: string; email: string; schoolKey: string }> {
   const { cognito } = getCognitoClient();
 
-  try {
-    const getUserCommand = new GetUserCommand({
-      AccessToken: accessToken,
-    });
+  const getUserCommand = new GetUserCommand({
+    AccessToken: accessToken,
+  });
 
-    const response = await cognito.send(getUserCommand);
+  const response = await cognito.send(getUserCommand);
 
-    if (response && response.Username && response.UserAttributes) {
-      const email = response.UserAttributes.find(attr => attr.Name === 'email')?.Value;
-      const schoolKey = response.UserAttributes.find(attr => attr.Name === 'custom:schoolKey')?.Value;
+  if (response && response.Username && response.UserAttributes) {
+    const email = response.UserAttributes.find(attr => attr.Name === 'email')?.Value;
+    const schoolKey = response.UserAttributes.find(attr => attr.Name === 'custom:schoolKey')?.Value;
 
-      return {
-        username: response.Username,
-        email: email || '',
-        schoolKey: schoolKey || '',
-      };
-    } else {
-      throw new Error('Failed to retrieve user details');
-    }
-  } catch (error) {
-    console.error('Error fetching user details:', error);
-    throw new Error('Invalid or expired access token');
+    return {
+      username: response.Username,
+      email: email || '',
+      schoolKey: schoolKey || '',
+    };
+  } else {
+    throw new Error('Failed to retrieve user details');
   }
 }
 
@@ -180,33 +146,24 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
 
 export async function doesUserExistByEmail(email: string): Promise<boolean> {
   const { cognito, userPoolId } = getCognitoClient();
-  try {
-    const listUsersCommand = new ListUsersCommand({
-      UserPoolId: userPoolId,
-      Filter: `email = "${email}"`,
-    });
-    const response = await cognito.send(listUsersCommand);
-    return (response.Users && response.Users.length > 0) || false;
-  } catch (error) {
-    console.error('Error checking if user exists:', error);
-    throw new Error('Failed to verify if user exists.');
-  }
+
+  const listUsersCommand = new ListUsersCommand({
+    UserPoolId: userPoolId,
+    Filter: `email = "${email}"`,
+  });
+  const response = await cognito.send(listUsersCommand);
+  return (response.Users && response.Users.length > 0) || false;
 }
 
 export async function resetUserPassword(username: string, newPassword: string): Promise<void> {
   const { cognito, userPoolId } = getCognitoClient();
 
-  try {
-    const command = new AdminSetUserPasswordCommand({
-      UserPoolId: userPoolId,
-      Username: username,
-      Password: newPassword,
-      Permanent: true,
-    });
+  const command = new AdminSetUserPasswordCommand({
+    UserPoolId: userPoolId,
+    Username: username,
+    Password: newPassword,
+    Permanent: true,
+  });
 
-    await cognito.send(command);
-  } catch (error) {
-    console.error('Error resetting password:', error);
-    throw new Error('Failed to reset user password.');
-  }
+  await cognito.send(command);
 }

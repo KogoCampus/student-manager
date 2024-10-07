@@ -34,11 +34,11 @@ export const handler: APIGatewayProxyHandler = async event => {
       return errorResponse('New password is required', 400);
     }
 
-    // Reset the user's password in Cognito
     await resetUserPassword(email, newPassword);
     await redis.delete(email);
 
     return successResponse({ message: 'Password reset successfully' });
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return exceptionResponse(error);

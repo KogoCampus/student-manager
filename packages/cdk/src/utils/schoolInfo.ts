@@ -19,7 +19,7 @@ export function isDesignatedSchoolEmail(email: string): boolean {
 
 export function getSchoolKeyByEmail(email: string): string {
   const domain = email.split('@')[1];
-  const school = Object.values(schoolInfoMap).find(school => school.domain === domain);
+  const school = Object.values(schoolInfoMap).find(school => school.domain === `@${domain}`);
   if (!school) {
     throw new Error('Email domain does not belong to any school');
   }
