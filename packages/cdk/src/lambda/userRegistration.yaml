@@ -73,5 +73,23 @@ openapi:
                       description: Token used to refresh the access token
           '400':
             description: Bad request - missing or invalid parameters
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Email and verification code are required"
+          '409':
+            description: Conflict - User already exists
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "User already exists with the provided email"
           '500':
             description: Internal server error
