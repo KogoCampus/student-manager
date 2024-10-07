@@ -7,13 +7,13 @@
   },
   "scripts": {
     "build": "node build.js",
-    "dev": "yarn build && bash bin/sam-local-api.sh",
+    "dev": "pnpm build && bash bin/sam-local-api.sh",
     "bootstrap": "cdk bootstrap --context env=staging",
     "deploy": "cdk deploy --all",
     "destroy": "cdk destroy --all",
     "cdk": "cdk",
     "test": "jest",
-    "lint": "eslint lib/**/*.ts src/**/*.ts bin/**/*.ts",
+    "lint": "eslint ./lib/**/*.ts ./src/**/*.ts ./bin/**/*.ts",
     "format": "prettier .",
     "format:write": "prettier --write .",
     "decrypt": "node decryptSecrets.js --directories ./secrets --region us-west-2 --secret-name /stg/student-manager/secrets"

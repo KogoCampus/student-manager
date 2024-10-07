@@ -32,24 +32,22 @@ jobs:
           aws configure set default.region us-west-2
         shell: bash
 
-      - name: Install dependencies
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Run install
+        run: pnpm install
+        env:
+             NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Decrypt secrets for CDK
-        working-directory: packages/cdk
-        run: node decryptSecrets.js --directories ./secrets --region us-west-2 --secret-name /stg/student-manager/secrets
+        run: pnpm --filter @student-manager/cdk run decrypt
 
       - name: Run tests
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: test
+        run: pnpm test
 
       - name: Build the project
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build --output-style=static
+        run: pnpm build --output-style=static
 
       - name: CDK Bootstrap
         uses: borales/actions-yarn@v4
