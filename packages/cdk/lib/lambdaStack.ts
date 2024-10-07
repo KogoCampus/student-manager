@@ -55,8 +55,8 @@ export class LambdaStack extends cdk.Stack {
       runtime: nodeVersion.lambaRuntime,
       timeout: Duration.seconds(15),
       vpc,
+      allowPublicSubnet: true,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
         subnets: publicSubnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
       },
       securityGroups: [props.securityGroup], // Use Lambda security group
