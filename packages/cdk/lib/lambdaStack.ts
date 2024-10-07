@@ -45,21 +45,32 @@ export class LambdaStack extends cdk.Stack {
       vpcId: awsImport.vpc.vpcId,
     });
 
-    const publicSubnets = [
-      awsImport.vpc.subnets.public.usWest2a,
-      awsImport.vpc.subnets.public.usWest2b,
-      awsImport.vpc.subnets.public.usWest2c,
+    const subnets = [
+      awsImport.vpc.subnets.private.usWest2a,
+      awsImport.vpc.subnets.private.usWest2b,
+      awsImport.vpc.subnets.private.usWest2c,
     ];
 
     const defaultLambdaProps = {
       runtime: nodeVersion.lambaRuntime,
       timeout: Duration.seconds(15),
       vpc,
-      allowPublicSubnet: true,
       vpcSubnets: {
-        subnets: publicSubnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
+        subnets: subnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
       },
       securityGroups: [props.securityGroup], // Use Lambda security group
+    };
+
+    // =================================================================
+    // CloudWatch Logs Policy for all Lambdas
+    // =================================================================
+    const cloudWatchLogsPolicy = new iam.PolicyStatement({
+      actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+      resources: ['*'],
+    });
+
+    const addCloudWatchLogsPolicy = (lambdaFunction: lambda.Function) => {
+      lambdaFunction.addToRolePolicy(cloudWatchLogsPolicy);
     };
 
     // =================================================================
@@ -74,13 +85,14 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    // Add IAM policy to allow Lambda to send emails using SES
+    // Add IAM policy
     emailVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
       }),
     );
+    addCloudWatchLogsPolicy(emailVerificationLambda);
 
     // path: /student/verify-email
     const emailVerificationIntegration = new apigateway.LambdaIntegration(emailVerificationLambda);
@@ -98,13 +110,14 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    // Add IAM policy to allow Lambda to send emails using SES
+    // Add IAM policy
     resendVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
       }),
     );
+    addCloudWatchLogsPolicy(resendVerificationLambda);
 
     // path: /student/resend-verification
     const resendVerificationIntegration = new apigateway.LambdaIntegration(resendVerificationLambda);
@@ -123,13 +136,14 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    // Add IAM policy to allow Lambda to manage Cognito users
+    // Add IAM policy
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
+    addCloudWatchLogsPolicy(userRegistrationLambda);
 
     // path: /student/register
     const userRegistrationIntegration = new apigateway.LambdaIntegration(userRegistrationLambda);
@@ -146,12 +160,15 @@ export class LambdaStack extends cdk.Stack {
         ...cognitoEnv,
       },
     });
+
+    // Add IAM policy
     signInLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminRespondToAuthChallenge'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
+    addCloudWatchLogsPolicy(signInLambda);
 
     // path: /student/signin
     const signInIntegration = new apigateway.LambdaIntegration(signInLambda);
@@ -170,13 +187,14 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    // Add IAM policy to allow Lambda to manage Cognito users
+    // Add IAM policy
     passwordResetLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminSetUserPassword', 'cognito-idp:ListUsers'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
+    addCloudWatchLogsPolicy(passwordResetLambda);
 
     // path: /student/password-reset
     const passwordResetIntegration = new apigateway.LambdaIntegration(passwordResetLambda);
@@ -193,12 +211,15 @@ export class LambdaStack extends cdk.Stack {
         ...cognitoEnv,
       },
     });
+
+    // Add IAM policy
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:GetUser'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
+    addCloudWatchLogsPolicy(authenticateUserLambda);
 
     // path: /student/authenticate
     const authenticateUserIntegration = new apigateway.LambdaIntegration(authenticateUserLambda);
