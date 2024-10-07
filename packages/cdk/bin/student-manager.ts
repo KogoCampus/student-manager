@@ -4,7 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 import { LambdaStack } from '../lib/lambdaStack';
 import { ElasticCacheStack } from '../lib/elasticacheStack';
-import { SecurityGroupStack } from '../lib/securitygroupStack';
+import { SecurityGroupStack } from '../lib/securityGroupStack';
 
 const app = new cdk.App();
 
@@ -36,7 +36,7 @@ async function getAccountIdAndRegion() {
 
   const redisStack = new ElasticCacheStack(app, stackName('ElasticCache'), {
     env: { account: accountId, region },
-    securityGroupStack,
+    securityGroup: securityGroupStack.elasticacheSecurityGroup,
   });
   redisStack.addDependency(securityGroupStack);
 
@@ -44,7 +44,7 @@ async function getAccountIdAndRegion() {
     env: { account: accountId, region },
     redisEndpoint: redisStack.redisEndpoint,
     redisPort: redisStack.redisPort,
-    securityGroupStack,
+    securityGroup: securityGroupStack.lambdaSecurityGroup,
   });
   lambdaStack.addDependency(redisStack);
 })();

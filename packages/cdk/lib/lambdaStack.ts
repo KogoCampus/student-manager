@@ -5,7 +5,6 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Duration } from 'aws-cdk-lib';
-import { SecurityGroupStack } from './securitygroupStack';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
@@ -17,7 +16,7 @@ const nodeVersion = {
 interface LambdaStackProps extends cdk.StackProps {
   redisEndpoint: string;
   redisPort: string;
-  securityGroupStack: SecurityGroupStack;
+  securityGroup: cdk.aws_ec2.SecurityGroup;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -60,7 +59,7 @@ export class LambdaStack extends cdk.Stack {
         subnetType: ec2.SubnetType.PUBLIC,
         subnets: publicSubnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
       },
-      securityGroups: [props.securityGroupStack.lambdaSecurityGroup], // Use Lambda security group
+      securityGroups: [props.securityGroup], // Use Lambda security group
     };
 
     // =================================================================

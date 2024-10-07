@@ -2,12 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
-import { SecurityGroupStack } from './securitygroupStack';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
 interface ElasticCacheStackProps extends cdk.StackProps {
-  securityGroupStack: SecurityGroupStack;
+  securityGroup: cdk.aws_ec2.SecurityGroup;
 }
 
 export class ElasticCacheStack extends cdk.Stack {
@@ -41,7 +40,7 @@ export class ElasticCacheStack extends cdk.Stack {
       engine: 'redis',
       cacheNodeType: 'cache.t3.micro', // Small serverless instance
       numCacheNodes: 1,
-      vpcSecurityGroupIds: [props.securityGroupStack.elasticacheSecurityGroup.securityGroupId],
+      vpcSecurityGroupIds: [props.securityGroup.securityGroupId],
       cacheSubnetGroupName: subnetGroup.ref,
     });
 
