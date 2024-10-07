@@ -46,5 +46,6 @@ async function getAccountIdAndRegion() {
     redisPort: redisStack.redisPort,
     securityGroup: securityGroupStack.lambdaSecurityGroup,
   });
+  lambdaStack.addDependency(securityGroupStack);
   lambdaStack.addDependency(redisStack);
 })();
