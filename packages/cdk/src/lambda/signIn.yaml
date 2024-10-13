@@ -1,20 +1,21 @@
 serverless:
-  SignInFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: lambda/signIn.handler
-      Runtime: nodejs20.x
-      CodeUri: .
-      Environment:
-        Variables:
-          COGNITO_USER_POOL_ID: us-west-2_Onci94rlj
-          COGNITO_CLIENT_ID: your-cognito-client-id
-      Events:
-        SignIn:
-          Type: Api
-          Properties:
-            Path: /student/signin
-            Method: post
+  Resources:
+    SignInFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/signIn.handler
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            COGNITO_USER_POOL_ID: 
+            COGNITO_CLIENT_ID:
+        Events:
+          SignIn:
+            Type: Api
+            Properties:
+              Path: /student/signin
+              Method: post
 
 openapi:
   paths:

@@ -111,8 +111,9 @@ const assembleSamTemplate = () => {
     const fileDoc = YAML.parse(fileContent);
 
     // Merge SAM docs
-    if (fileDoc.serverless && fileDoc.serverless) {
-      Object.assign(commonSamTemplate.Resources, fileDoc.serverless);
+    if (fileDoc.serverless && fileDoc.serverless.Resources) {
+      // Here we are merging only the 'Resources' part of the file
+      Object.assign(commonSamTemplate.Resources, fileDoc.serverless.Resources);
       console.log(color(`  Merged ${file} into SAM template`, greenText));
     }
   });

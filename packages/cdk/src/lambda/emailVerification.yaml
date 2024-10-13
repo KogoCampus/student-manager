@@ -1,40 +1,21 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-
-Parameters:
-  RedisEndpoint:
-    Type: String
-    Default: host.docker.internal
-  RedisPort:
-    Type: String
-    Default: "63790"
-
-Resources:
-  EmailVerificationFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: dist/lambda/emailVerification.handler
-      Runtime: nodejs20.x
-      CodeUri: .
-      Environment:
-        REDIS_ENDPOINT: 
-          Fn::Ref: RedisEndpoint
-        REDIS_PORT: 
-          Fn::Ref: RedisPort
-      Events:
-        EmailVerification:
-          Type: Api
-          Properties:
-            Path: /student/verify-email
-            Method: post
-
-Outputs:
-  RedisEndpoint:
-    Value: 
-      Fn::Ref: RedisEndpoint
-  RedisPort:
-    Value: 
-      Fn::Ref: RedisPort
+serverless:
+  Resources:
+    EmailVerificationFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: dist/lambda/emailVerification.handler
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+        Events:
+          EmailVerification:
+            Type: Api
+            Properties:
+              Path: /student/verify-email
+              Method: post
 
 openapi:
   paths:

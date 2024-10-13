@@ -1,19 +1,21 @@
 serverless:
-  EmailVerificationFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: lambda/emailVerification.handler
-      Runtime: nodejs20.x
-      CodeUri: .
-      Environment:
-        Variables:
-
-      Events:
-        EmailVerification:
-          Type: Api
-          Properties:
-            Path: /student/verify-email
-            Method: post
+  Resources:
+    EmailVerificationFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/emailVerification.handler
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+        Events:
+          EmailVerification:
+            Type: Api
+            Properties:
+              Path: /student/verify-email
+              Method: post
             
 openapi:
   paths:

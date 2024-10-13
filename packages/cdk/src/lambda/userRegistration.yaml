@@ -1,22 +1,23 @@
 serverless:
-  UserRegistrationFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: lambda/userRegistration.handler
-      Runtime: nodejs20.x
-      CodeUri: .
-      Environment:
-        Variables:
-          REDIS_ENDPOINT: host.docker.internal
-          REDIS_PORT: "63790"
-          COGNITO_USER_POOL_ID: us-west-2_Onci94rlj
-          COGNITO_CLIENT_ID: your-cognito-client-id
-      Events:
-        UserRegistration:
-          Type: Api
-          Properties:
-            Path: /student/register
-            Method: post
+  Resources:
+    UserRegistrationFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/userRegistration.handler
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+            COGNITO_USER_POOL_ID:
+            COGNITO_CLIENT_ID:
+        Events:
+          UserRegistration:
+            Type: Api
+            Properties:
+              Path: /student/register
+              Method: post
 
 openapi:
   paths:
