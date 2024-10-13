@@ -3,7 +3,7 @@ serverless:
     AuthenticateUserFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: dist/lambda/authenticateUser.handler
+        Handler: lambda/authenticateUser.handler
         Runtime: nodejs20.x
         CodeUri: .
         Environment:

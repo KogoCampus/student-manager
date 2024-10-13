@@ -2,7 +2,7 @@ serverless:
   UserRegistrationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/lambda/userRegistration.handler
+      Handler: lambda/userRegistration.handler
       Runtime: nodejs20.x
       CodeUri: .
       Environment:

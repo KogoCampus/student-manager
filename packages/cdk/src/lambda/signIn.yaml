@@ -2,7 +2,7 @@ serverless:
   SignInFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/lambda/signIn.handler
+      Handler: lambda/signIn.handler
       Runtime: nodejs20.x
       CodeUri: .
       Environment:

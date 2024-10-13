@@ -1,0 +1,50 @@
+serverless:
+  EmailVerificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda/emailVerification.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+
+      Events:
+        EmailVerification:
+          Type: Api
+          Properties:
+            Path: /student/verify-email
+            Method: post
+            
+openapi:
+  paths:
+    /student/report:
+      post:
+        summary: report a content or a user
+        description: Sends a report to the admin about a content or a user.
+        requestBody:
+          description: The report information
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contentType:
+                    type: string
+                    description: The type of the content or user.
+                  contentId:
+                    type: string
+                    description: The Id of the content or user.
+                  reportDetails:
+                    type: string
+                    description: The details for the report.
+                  reporter:
+                    type: string
+                    description: The username of the reporter.
+        responses:
+          '200':
+            description: Report sent successfully
+          '400':
+            description: Bad request - missing or invalid parameters
+          '500':
+            description: Internal server error
