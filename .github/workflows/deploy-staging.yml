@@ -46,7 +46,7 @@ jobs:
         run: pnpm test
 
       - name: Build the project
-        run: pnpm build --output-style=static
+        run: pnpm build
 
       - name: CDK Bootstrap
         uses: borales/actions-yarn@v4

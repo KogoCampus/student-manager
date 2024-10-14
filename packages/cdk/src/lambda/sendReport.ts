@@ -8,7 +8,6 @@ import { buildEmailParams } from '../utils/sendEmail';
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
-
   try {
     const { contentType, contentId, reportDetails, reporter } = JSON.parse(event.body || '{}');
 
@@ -23,12 +22,7 @@ export const handler: APIGatewayProxyHandler = async event => {
       reporter,
     };
 
-    const emailParams = buildEmailParams(
-      'scott0929@gmail.com',
-      'report',
-      dynamicData,
-      'welcome@kogocampus.com'
-    );
+    const emailParams = buildEmailParams('scott0929@gmail.com', 'report', dynamicData, 'welcome@kogocampus.com');
 
     const command = new SendEmailCommand(emailParams);
     await SES.send(command);
