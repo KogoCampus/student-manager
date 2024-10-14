@@ -14,7 +14,7 @@ export const handler: APIGatewayProxyHandler = async event => {
     if (!contentType || !contentId || !reportDetails || !reporterId) {
       return errorResponse('Missing required parameters', 400);
     }
-    
+
     const dynamicData = {
       contentType,
       contentId,

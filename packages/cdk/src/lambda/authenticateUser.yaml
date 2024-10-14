@@ -56,8 +56,18 @@ openapi:
                           type: string
                           example: "johndoe@example.com"
                         schoolInfo:
-                          type: string
-                          example: "School information not found"
+                          type: object
+                          description: School information of the user
+                          properties:
+                            domain:
+                              type: string
+                              example: "@sfu.ca"
+                            name:
+                              type: string
+                              example: "Simon Fraser University"
+                            shortenedName:
+                              type: string
+                              example: "sfu"
                     access_token:
                       type: string
                       description: New access token
