@@ -113,7 +113,7 @@ export class LambdaStack extends cdk.Stack {
     // Add IAM policy to allow Lambda to manage Cognito users
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser', 'cognito-idp:ListUsers'],
+        actions: ['cognito-idp:AdminSetUserPassword', 'cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:ListUsers'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
