@@ -9,20 +9,25 @@ const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
   try {
-    const { contentType, contentId, reportDetails, reporter } = JSON.parse(event.body || '{}');
+    const { contentType, contentId, reportDetails, reporterId } = JSON.parse(event.body || '{}');
 
-    if (!contentType || !contentId || !reportDetails || !reporter) {
+    if (!contentType || !contentId || !reportDetails || !reporterId) {
       return errorResponse('Missing required parameters', 400);
     }
+    
+    console.log('contentType:', contentType);
+    console.log('contentId:', contentId);
+    console.log('reportDetails:', reportDetails);
+    console.log('reporterId:', reporterId);
 
     const dynamicData = {
       contentType,
       contentId,
       reportDetails,
-      reporter,
+      reporterId,
     };
 
-    const emailParams = buildEmailParams('scott0929@gmail.com', 'report', dynamicData, 'welcome@kogocampus.com');
+    const emailParams = buildEmailParams('support@kogocampus.com', 'report', dynamicData, 'welcome@kogocampus.com');
 
     const command = new SendEmailCommand(emailParams);
     await SES.send(command);

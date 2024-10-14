@@ -1,9 +1,9 @@
 serverless:
   Resources:
-    EmailVerificationFunction:
+    SendReportFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/emailVerification.handler
+        Handler: lambda/sendReport.handler
         Runtime: nodejs20.x
         CodeUri: .
         Environment:
@@ -11,7 +11,7 @@ serverless:
             REDIS_ENDPOINT:
             REDIS_PORT:
         Events:
-          EmailVerification:
+          SendReport:
             Type: Api
             Properties:
               Path: /student/send-report
@@ -40,9 +40,9 @@ openapi:
                   reportDetails:
                     type: string
                     description: The details for the report.
-                  reporter:
+                  reporterId:
                     type: string
-                    description: The username of the reporter.
+                    description: The Id of the reporter.
         responses:
           '200':
             description: Report sent successfully
