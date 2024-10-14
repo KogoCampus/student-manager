@@ -10,7 +10,7 @@
     "dev": "pnpm build && bash bin/sam-local-api.sh",
     "cdk:bootstrap": "cdk bootstrap --context env=staging",
     "cdk:deploy": "cdk deploy --all",
-    "destroy": "cdk destroy --all",
+    "cdk:destroy": "cdk destroy --all",
     "cdk": "cdk",
     "test": "jest",
     "lint": "eslint ./lib/**/*.ts ./src/**/*.ts ./bin/**/*.ts",

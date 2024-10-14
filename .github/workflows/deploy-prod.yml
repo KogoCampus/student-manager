@@ -47,8 +47,8 @@ jobs:
           
       - name: CDK Bootstrap
         working-directory: packages/cdk
-        run: cdk bootstrap --context env=production
+        run: workspace @student-manager/cdk cdk:bootstrap --context env=production
 
       - name: CDK Deploy Production
         working-directory: packages/cdk
-        run: cdk deploy --all --context env=production --require-approval never
+        run: workspace @student-manager/cdk cdk:deploy --context env=production --require-approval never
