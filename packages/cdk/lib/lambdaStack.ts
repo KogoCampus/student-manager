@@ -200,7 +200,7 @@ export class LambdaStack extends cdk.Stack {
 
     // path: /student/authenticate
     const authenticateUserIntegration = new apigateway.LambdaIntegration(authenticateUserLambda);
-    studentResource.addResource('authenticate').addMethod('POST', authenticateUserIntegration);
+    studentResource.addResource('authenticate').addMethod('GET', authenticateUserIntegration);
 
     // =================================================================
     // Send Report Lambda
