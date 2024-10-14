@@ -15,11 +15,6 @@ export const handler: APIGatewayProxyHandler = async event => {
       return errorResponse('Missing required parameters', 400);
     }
     
-    console.log('contentType:', contentType);
-    console.log('contentId:', contentId);
-    console.log('reportDetails:', reportDetails);
-    console.log('reporterId:', reporterId);
-
     const dynamicData = {
       contentType,
       contentId,
