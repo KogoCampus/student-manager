@@ -28,7 +28,7 @@ describe('sendReport handler', () => {
         SESClient.prototype.send = mockSend;
         // Mock the buildEmailParams function
         (buildEmailParams as jest.Mock).mockReturnValue({
-            Destination: { ToAddresses: ['scott0929@gmail.com'] },
+            Destination: { ToAddresses: ['support@kogocampus.com'] },
             Message: { Subject: { Data: 'Report' }, Body: { Text: { Data: 'Inappropriate content' } } },
             Source: 'welcome@kogocampus.com',
         });
@@ -49,7 +49,7 @@ describe('sendReport handler', () => {
     
         const result = await handler(mockEvent as any, mockContext, mockCallback);
         expect(mockSend).toHaveBeenCalledWith(expect.any(SendEmailCommand));
-        expect(buildEmailParams).toHaveBeenCalledWith('scott0929@gmail.com', 'report', expect.objectContaining({
+        expect(buildEmailParams).toHaveBeenCalledWith('support@kogocampus.com', 'report', expect.objectContaining({
           contentType: 'post',
           contentId: '123',
           reportDetails: 'Inappropriate content',
