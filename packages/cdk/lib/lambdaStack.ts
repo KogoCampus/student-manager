@@ -173,7 +173,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const authenticateUserLambda = new lambda.Function(this, 'AuthenticateUserHandler', {
       runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('lambda'),
+      code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'authenticateUser.handler',
       vpc,
       environment: {
@@ -196,7 +196,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const sendReportLambda = new lambda.Function(this, 'SendReportHandler', {
       runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('lambda'),
+      code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'sendReport.handler',
       vpc,
       environment: {
