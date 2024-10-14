@@ -46,14 +46,11 @@ jobs:
         run: pnpm test
 
       - name: Build the project
-        run: pnpm build
+        working-directory: packages/cdk
+        run: pnpm build --output-style=static
 
       - name: CDK Bootstrap
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: workspace @student-manager/cdk cdk:bootstrap
+        run: pnpm --filter @student-manager/cdk run cdk:bootstrap
 
       - name: CDK Deploy
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: workspace @student-manager/cdk cdk:deploy --require-approval never
+        run: pnpm --filter @student-manager/cdk run cdk:deploy --require-approval never

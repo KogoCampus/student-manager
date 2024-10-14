@@ -44,11 +44,9 @@ jobs:
 
       - name: Build the project
         run: pnpm build --output-style=static
-          
-      - name: CDK Bootstrap
-        working-directory: packages/cdk
-        run: workspace @student-manager/cdk cdk:bootstrap --context env=production
 
-      - name: CDK Deploy Production
-        working-directory: packages/cdk
-        run: workspace @student-manager/cdk cdk:deploy --context env=production --require-approval never
+      - name: CDK Bootstrap
+        run: pnpm --filter @student-manager/cdk run cdk:bootstrap --context env=production
+
+      - name: CDK Deploy
+        run: pnpm --filter @student-manager/cdk run cdk:deploy --context env=production --require-approval never
