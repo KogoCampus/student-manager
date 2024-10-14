@@ -61,7 +61,7 @@ export class LambdaStack extends cdk.Stack {
     emailVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
       }),
     );
 
@@ -87,7 +87,7 @@ export class LambdaStack extends cdk.Stack {
     resendVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
       }),
     );
 

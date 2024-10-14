@@ -26,16 +26,16 @@ export const handler: APIGatewayProxyHandler = async event => {
     }
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('test1');
+
     const redis = RedisClient.getInstance();
-    console.log('test2');
+
     // Set verification code with expiry in Redis
     await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
-    console.log('test3');
+
     const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'welcome@kogocampus.com');
     const command = new SendEmailCommand(emailParams);
     await SES.send(command);
-    console.log('test4');
+
     return successResponse({ message: 'Verification email sent' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
