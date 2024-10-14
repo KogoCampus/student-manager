@@ -1,0 +1,52 @@
+serverless:
+  Resources:
+    SendReportFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/sendReport.handler
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+        Events:
+          SendReport:
+            Type: Api
+            Properties:
+              Path: /student/send-report
+              Method: post
+            
+openapi:
+  paths:
+    /student/report:
+      post:
+        summary: Report a content or a user
+        description: Sends a report to the admin
+        requestBody:
+          description: The report data
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contentType:
+                    type: string
+                    description: The type of the content or user.
+                  contentId:
+                    type: string
+                    description: The Id of the content or user.
+                  reportDetails:
+                    type: string
+                    description: The details for the report.
+                  reporterId:
+                    type: string
+                    description: The Id of the reporter.
+        responses:
+          '200':
+            description: Report sent successfully
+          '400':
+            description: Bad request - missing or invalid parameters
+          '500':
+            description: Internal server error

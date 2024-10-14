@@ -3,5 +3,10 @@
     "domain": "@sfu.ca",
     "name": "Simon Fraser University",
     "shortenedName": "SFU"
+  },
+  "university_of_british_columbia": {
+    "domain": "@ubc.ca",
+    "name": "University of British Columbia",
+    "shortenedName": "UBC"
   }
 }

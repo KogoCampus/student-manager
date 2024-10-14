@@ -3,13 +3,13 @@ serverless:
     AuthenticateUserFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: dist/lambda/authenticateUser.handler
+        Handler: lambda/authenticateUser.handler
         Runtime: nodejs20.x
         CodeUri: .
         Environment:
           Variables:
-            COGNITO_USER_POOL_ID: us-west-2_abcde12345
-            COGNITO_CLIENT_ID: your-cognito-client-id
+            COGNITO_USER_POOL_ID:
+            COGNITO_CLIENT_ID:
         Events:
           AuthenticateUserApi:
             Type: Api

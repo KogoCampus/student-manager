@@ -4,7 +4,6 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { Duration } from 'aws-cdk-lib';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
@@ -41,58 +40,29 @@ export class LambdaStack extends cdk.Stack {
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
 
-    const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
-      vpcId: awsImport.vpc.vpcId,
-    });
-
-    const subnets = [
-      awsImport.vpc.subnets.private.usWest2a,
-      awsImport.vpc.subnets.private.usWest2b,
-      awsImport.vpc.subnets.private.usWest2c,
-    ];
-
-    const defaultLambdaProps = {
-      runtime: nodeVersion.lambaRuntime,
-      timeout: Duration.seconds(15),
-      vpc,
-      vpcSubnets: {
-        subnets: subnets.map(subnetId => ec2.Subnet.fromSubnetId(this, `PublicSubnet${subnetId}`, subnetId)),
-      },
-      securityGroups: [props.securityGroup], // Use Lambda security group
-    };
-
-    // =================================================================
-    // CloudWatch Logs Policy for all Lambdas
-    // =================================================================
-    const cloudWatchLogsPolicy = new iam.PolicyStatement({
-      actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
-      resources: ['*'],
-    });
-
-    const addCloudWatchLogsPolicy = (lambdaFunction: lambda.Function) => {
-      lambdaFunction.addToRolePolicy(cloudWatchLogsPolicy);
-    };
-
     // =================================================================
     // Email Verification Lambda
     // =================================================================
+    const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
+      vpcId: awsImport.vpc.vpcId,
+    });
     const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'emailVerification.handler',
+      vpc,
       environment: {
         ...elasticCacheEnv,
       },
     });
 
-    // Add IAM policy
+    // Add IAM policy to allow Lambda to send emails using SES
     emailVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
+        resources: [awsImport.ses.sesIdentityArn],
       }),
     );
-    addCloudWatchLogsPolicy(emailVerificationLambda);
 
     // path: /student/verify-email
     const emailVerificationIntegration = new apigateway.LambdaIntegration(emailVerificationLambda);
@@ -102,22 +72,22 @@ export class LambdaStack extends cdk.Stack {
     // Resend Verification Lambda
     // =================================================================
     const resendVerificationLambda = new lambda.Function(this, 'ResendVerificationHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'resendVerification.handler',
+      vpc,
       environment: {
         ...elasticCacheEnv,
       },
     });
 
-    // Add IAM policy
+    // Add IAM policy to allow Lambda to send emails using SES
     resendVerificationLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
+        resources: [awsImport.ses.sesIdentityArn],
       }),
     );
-    addCloudWatchLogsPolicy(resendVerificationLambda);
 
     // path: /student/resend-verification
     const resendVerificationIntegration = new apigateway.LambdaIntegration(resendVerificationLambda);
@@ -127,28 +97,23 @@ export class LambdaStack extends cdk.Stack {
     // User Registration Lambda
     // =================================================================
     const userRegistrationLambda = new lambda.Function(this, 'UserRegistrationHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'userRegistration.handler',
+      vpc,
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
       },
     });
 
-    // Add IAM policy
+    // Add IAM policy to allow Lambda to manage Cognito users
     userRegistrationLambda.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: [
-          'cognito-idp:AdminCreateUser',
-          'cognito-idp:AdminDisableUser',
-          'cognito-idp:AdminSetUserPassword',
-          'cognito-idp:AdminInitiateAuth',
-        ],
+        actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminDeleteUser'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
-    addCloudWatchLogsPolicy(userRegistrationLambda);
 
     // path: /student/register
     const userRegistrationIntegration = new apigateway.LambdaIntegration(userRegistrationLambda);
@@ -158,22 +123,20 @@ export class LambdaStack extends cdk.Stack {
     // Sign In Lambda
     // =================================================================
     const signInLambda = new lambda.Function(this, 'SignInHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'signIn.handler',
+      vpc,
       environment: {
         ...cognitoEnv,
       },
     });
-
-    // Add IAM policy
     signInLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminRespondToAuthChallenge'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
-    addCloudWatchLogsPolicy(signInLambda);
 
     // path: /student/signin
     const signInIntegration = new apigateway.LambdaIntegration(signInLambda);
@@ -183,23 +146,23 @@ export class LambdaStack extends cdk.Stack {
     // Password Reset Lambda
     // =================================================================
     const passwordResetLambda = new lambda.Function(this, 'PasswordResetHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'passwordReset.handler',
+      vpc,
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
       },
     });
 
-    // Add IAM policy
+    // Add IAM policy to allow Lambda to manage Cognito users
     passwordResetLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['cognito-idp:AdminSetUserPassword', 'cognito-idp:ListUsers'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
-    addCloudWatchLogsPolicy(passwordResetLambda);
 
     // path: /student/password-reset
     const passwordResetIntegration = new apigateway.LambdaIntegration(passwordResetLambda);
@@ -209,25 +172,47 @@ export class LambdaStack extends cdk.Stack {
     // Authenticate User Lambda
     // =================================================================
     const authenticateUserLambda = new lambda.Function(this, 'AuthenticateUserHandler', {
-      ...defaultLambdaProps,
+      runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'authenticateUser.handler',
+      vpc,
       environment: {
         ...cognitoEnv,
       },
     });
-
-    // Add IAM policy
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['cognito-idp:GetUser', 'cognito-idp:AdminInitiateAuth'],
+        actions: ['cognito-idp:GetUser'],
         resources: [awsImport.cognito.userPoolArn],
       }),
     );
-    addCloudWatchLogsPolicy(authenticateUserLambda);
 
     // path: /student/authenticate
     const authenticateUserIntegration = new apigateway.LambdaIntegration(authenticateUserLambda);
-    studentResource.addResource('authenticate').addMethod('GET', authenticateUserIntegration);
+    studentResource.addResource('authenticate').addMethod('POST', authenticateUserIntegration);
+
+    // =================================================================
+    // Send Report Lambda
+    // =================================================================
+    const sendReportLambda = new lambda.Function(this, 'SendReportHandler', {
+      runtime: nodeVersion.lambaRuntime,
+      code: lambda.Code.fromAsset('dist/lambda'),
+      handler: 'sendReport.handler',
+      vpc,
+      environment: {
+        ...elasticCacheEnv,
+      },
+    });
+
+    // Add IAM policy for sending emails via SES (if the report sends notifications)
+    sendReportLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ses:SendEmail', 'ses:SendTemplatedEmail', 'ses:SendRawEmail'],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
+      }),
+    );
+
+    const sendReportIntegration = new apigateway.LambdaIntegration(sendReportLambda);
+    studentResource.addResource('send-report').addMethod('POST', sendReportIntegration);
   }
 }
