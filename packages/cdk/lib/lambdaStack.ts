@@ -51,6 +51,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'emailVerification.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
       },
@@ -76,6 +77,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'resendVerification.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
       },
@@ -101,6 +103,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'userRegistration.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
@@ -127,6 +130,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'signIn.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
       },
@@ -150,6 +154,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'passwordReset.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
@@ -176,6 +181,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda'),
       handler: 'authenticateUser.handler',
       vpc,
+      securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
       },
