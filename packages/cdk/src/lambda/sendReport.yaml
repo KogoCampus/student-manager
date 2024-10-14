@@ -14,17 +14,17 @@ serverless:
           EmailVerification:
             Type: Api
             Properties:
-              Path: /student/verify-email
+              Path: /student/send-report
               Method: post
             
 openapi:
   paths:
     /student/report:
       post:
-        summary: report a content or a user
-        description: Sends a report to the admin about a content or a user.
+        summary: Report a content or a user
+        description: Sends a report to the admin
         requestBody:
-          description: The report information
+          description: The report data
           required: true
           content:
             application/json:

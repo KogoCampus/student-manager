@@ -19,5 +19,12 @@
       "TextPart": "Hello,\n\nWelcome to Kogo! We're glad to have you on board.\n\nThank you,\nStudent Manager Team",
       "HtmlPart": "<html><body><p>Hello,</p><p>Welcome to Kogo! We're glad to have you on board.</p><p>Thank you,<br>Student Manager Team</p></body></html>"
     }
+  },
+  "report": {
+    "Template": {
+      "SubjectPart": "New Report from {{reporter}}",
+      "TextPart": "Hello,\n\nA new report has been submitted by {{reporter}}.\n\nDetails:\nContent Type: {{contentType}}\nContent ID: {{contentId}}\nReport Details: {{reportDetails}}\n\nThank you,\nKogo Team",
+      "HtmlPart": "<html><body><p>Hello,</p><p>A new report has been submitted by <strong>{{reporter}}</strong>.</p><p><strong>Details:</strong></p><ul><li>Content Type: {{contentType}}</li><li>Content ID: {{contentId}}</li><li>Report Details: {{reportDetails}}</li></ul><p>Thank you,<br>Kogo Team</p></body></html>"
+    }
   }
 }
