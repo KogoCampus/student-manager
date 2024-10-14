@@ -30,6 +30,7 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.658.1",
     "@aws-sdk/client-ses": "^3.658.1",
+    "@aws-sdk/client-sts": "^3.670.0",
     "aws-cdk-lib": "2.152.0",
     "constructs": "^10.0.0",
     "dotenv": "^16.4.5",
