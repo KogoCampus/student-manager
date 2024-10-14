@@ -46,7 +46,6 @@ jobs:
         run: pnpm test
 
       - name: Build the project
-        working-directory: packages/cdk
         run: pnpm build --output-style=static
 
       - name: CDK Bootstrap
