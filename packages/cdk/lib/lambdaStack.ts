@@ -76,7 +76,7 @@ export class LambdaStack extends cdk.Stack {
     const verifyEmailCompleteLambda = new lambda.Function(this, 'VerifyEmailCompleteHandler', {
       runtime: nodeVersion.lambaRuntime,
       code: lambda.Code.fromAsset('dist/lambda'),
-      handler: 'verifyEmailComplete.handler',
+      handler: 'emailVerificationComplete.handler',
       vpc,
       securityGroups: [props.securityGroup],
       environment: {
