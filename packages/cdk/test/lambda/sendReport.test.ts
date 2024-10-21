@@ -46,7 +46,7 @@ describe('sendReport handler', () => {
 
     it('should send a report email successfully', async () => {
         mockSend.mockResolvedValueOnce({}); // Mock SES send command success
-    
+  
         const result = await handler(mockEvent as any, mockContext, mockCallback);
         expect(mockSend).toHaveBeenCalledWith(expect.any(SendEmailCommand));
         expect(buildEmailParams).toHaveBeenCalledWith('support@kogocampus.com', 'report', expect.objectContaining({
@@ -59,10 +59,8 @@ describe('sendReport handler', () => {
 
       });
 
-      it('should return exception response on error', async () => {
+      it('should throw an error on SES error', async () => {
         mockSend.mockRejectedValueOnce(new Error('SES error')); // Mock SES send command error
-    
-        const result = await handler(mockEvent as any, mockContext, mockCallback);
-        expect(result).toEqual(exceptionResponse(new Error('SES error')));
+        await expect(handler(mockEvent as any, mockContext, mockCallback)).rejects.toThrow('SES error');
       });
 });

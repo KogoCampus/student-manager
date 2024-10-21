@@ -43,9 +43,9 @@ export class LambdaStack extends cdk.Stack {
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
     const sentryEnv = {
-      NODE_OPTIONS: "-r @sentry/aws-serverless/awslambda-auto",
+      NODE_OPTIONS: '-r @sentry/aws-serverless/awslambda-auto',
       SENTRY_DSN: awsImport.sentry.dsn,
-      SENTRY_TRACES_SAMPLE_RATE: "1.0",
+      SENTRY_TRACES_SAMPLE_RATE: '1.0',
     };
 
     // =================================================================
@@ -93,7 +93,7 @@ export class LambdaStack extends cdk.Stack {
         ...elasticCacheEnv,
         ...sentryEnv,
       },
-      layers: [sentryLayer],  
+      layers: [sentryLayer],
     });
 
     // path: /student/verify-email/complete

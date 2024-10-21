@@ -65,10 +65,9 @@ describe('emailVerification handler', () => {
     expect(result).toEqual(successResponse({ message: 'Verification email sent' }));
   });
 
-  it('should return exception response on error', async () => {
+  it('should throw an error on Redis error', async () => {
     const event = { queryStringParameters: { email: 'test@school.edu' } };
     mockRedisInstance.setWithExpiry.mockRejectedValueOnce(new Error('Redis error'));
-    const result = await handler(event as any, mockContext, mockCallback);
-    expect(result).toEqual(exceptionResponse(new Error('Redis error')));
+    await expect(handler(event as any, mockContext, mockCallback)).rejects.toThrow('Redis error');
   });
 });

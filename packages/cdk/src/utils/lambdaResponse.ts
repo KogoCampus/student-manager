@@ -29,14 +29,16 @@ export function errorResponse(message: string, statusCode: number = 400, headers
   };
 }
 
-// Helper function for handling exceptions
-export function exceptionResponse(error: Error, statusCode: number = 500, headers: Record<string, string> = defaultHeaders) {
-  return {
-    statusCode,
-    headers,
-    body: JSON.stringify({
-      error: 'An internal server error occurred.',
-      details: error.message,
-    }),
-  };
+// function for handling exceptions. Should throw error if unhandled exception is thrown.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function exceptionResponse(error: Error, statusCode: number = 500, headers: Record<string, string> = defaultHeaders): any {
+  throw error;
+  //return {
+  //  statusCode,
+  //  headers,
+  //  body: JSON.stringify({
+  //    error: 'An internal server error occurred.',
+  //    details: error.message,
+  //  }),
+  //};
 }
