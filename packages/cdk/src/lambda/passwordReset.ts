@@ -1,10 +1,9 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { doesUserExistByEmail, resetUserPassword } from '../utils/cognito';
-import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse } from '../utils/lambdaResponse';
 import { getAuthToken, deleteAuthToken } from '../utils/authToken';
 
 export const handler: APIGatewayProxyHandler = async event => {
-  try {
     const email = event.queryStringParameters?.email;
     const authToken = event.queryStringParameters?.authToken;
 
@@ -17,7 +16,6 @@ export const handler: APIGatewayProxyHandler = async event => {
     if (!storedAuthToken) {
       return errorResponse('Authorization token has expired or does not exist', 401);
     }
-
     if (storedAuthToken !== authToken) {
       return errorResponse('Invalid authorization token', 401);
     }
@@ -29,21 +27,13 @@ export const handler: APIGatewayProxyHandler = async event => {
 
     const requestBody = JSON.parse(event.body || '{}');
     const { newPassword } = requestBody;
-
     if (!newPassword) {
       return errorResponse('New password is required', 400);
     }
 
-    // Reset the user password
+    // Reset the user password and remove the auth token after successful password reset
     await resetUserPassword(email, newPassword);
-
-    // Remove the auth token after successful password reset
     await deleteAuthToken(email);
 
     return successResponse({ message: 'Password reset successfully' });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    return exceptionResponse(error);
-  }
 };

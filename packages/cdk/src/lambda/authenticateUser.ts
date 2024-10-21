@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse } from '../utils/lambdaResponse';
 import { getUserDetailsFromAccessToken, refreshAccessToken } from '../utils/cognito';
 import { getSchoolInfoByKey } from '../utils/schoolInfo';
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handler } from '../../src/lambda/sendReport';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 import { buildEmailParams } from '../../src/utils/sendEmail';
 
 // Mock the external dependencies

@@ -2,7 +2,7 @@
 import { handler } from '../../src/lambda/authenticateUser';
 import { getUserDetailsFromAccessToken, refreshAccessToken } from '../../src/utils/cognito';
 import { getSchoolInfoByKey } from '../../src/utils/schoolInfo';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 
 // Mock the external dependencies
 jest.mock('../../src/utils/cognito');
@@ -129,20 +129,6 @@ describe('authenticateUser handler', () => {
     const result = await handler(event as any, mockContext, mockCallback);
 
     expect(errorResponse).toHaveBeenCalledWith('Invalid grant_type provided', 400);
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = {
-      headers: { Authorization: 'Bearer validAccessToken' },
-      queryStringParameters: { grant_type: 'access_token' },
-    };
-
-    (getUserDetailsFromAccessToken as jest.Mock).mockRejectedValueOnce(new Error('Cognito error'));
-
-    const result = await handler(event as any, mockContext, mockCallback);
-
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Cognito error'));
     expect(result).toBeUndefined();
   });
 });

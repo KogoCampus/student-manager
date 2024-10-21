@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handler } from '../../src/lambda/signIn';
 import { authenticateUser } from '../../src/utils/cognito';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 
 // Mock the external dependencies
 jest.mock('../../src/utils/cognito');
@@ -50,15 +50,6 @@ describe('signIn handler', () => {
       idToken: 'id_token',
       refreshToken: 'refresh_token',
     });
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = { body: JSON.stringify({ username: 'testuser', password: 'Password123!' }) };
-    (authenticateUser as jest.Mock).mockRejectedValueOnce(new Error('Cognito error'));
-
-    const result = await handler(event as any, mockContext, mockCallback);
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Cognito error'));
     expect(result).toBeUndefined();
   });
 });

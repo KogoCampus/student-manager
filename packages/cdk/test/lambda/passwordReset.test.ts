@@ -2,7 +2,7 @@
 import { handler } from '../../src/lambda/passwordReset';
 import { RedisClient } from '../../src/utils/redis';
 import { resetUserPassword, doesUserExistByEmail } from '../../src/utils/cognito';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
 
 // Mock external dependencies
@@ -84,14 +84,6 @@ describe('passwordReset handler', () => {
     expect(resetUserPassword).toHaveBeenCalledWith('test@school.edu', 'NewPassword123!');
     expect(deleteAuthToken).toHaveBeenCalledWith('test@school.edu');
     expect(successResponse).toHaveBeenCalledWith({ message: 'Password reset successfully' });
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = { queryStringParameters: { email: 'test@school.edu', authToken: 'correct_token' } };
-    (getAuthToken as jest.Mock).mockRejectedValueOnce(new Error('Redis error'));
-    const result = await handler(event as any, mockContext, mockCallback);
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();
   });
 });

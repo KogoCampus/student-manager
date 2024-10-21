@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handler } from '../../src/lambda/emailVerificationComplete';
 import { RedisClient } from '../../src/utils/redis';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 import { generateAuthToken, storeAuthToken } from '../../src/utils/authToken';
 
 // Mock the external dependencies
@@ -74,16 +74,6 @@ describe('verifyEmailComplete handler', () => {
       message: 'Email verified successfully.',
       authToken: 'auth_token',
     });
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
-    };
-    mockRedisInstance.get.mockRejectedValueOnce(new Error('Redis error'));
-    const result = await handler(event as any, mockContext, mockCallback);
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();
   });
 });

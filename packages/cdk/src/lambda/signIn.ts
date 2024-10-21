@@ -1,9 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse } from '../utils/lambdaResponse';
 import { authenticateUser } from '../utils/cognito';
 
 export const handler: APIGatewayProxyHandler = async event => {
-  try {
     const requestBody = JSON.parse(event.body || '{}');
     const { username, password } = requestBody;
     if (!username || !password) {
@@ -23,8 +22,4 @@ export const handler: APIGatewayProxyHandler = async event => {
       idToken: IdToken,
       refreshToken: RefreshToken,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    return exceptionResponse(error);
-  }
 };

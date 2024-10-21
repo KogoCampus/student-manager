@@ -3,7 +3,7 @@ import { handler } from '../../src/lambda/resendVerification';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { RedisClient } from '../../src/utils/redis';
 import { buildEmailParams } from '../../src/utils/sendEmail';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 
 // Mock the external dependencies
 jest.mock('@aws-sdk/client-ses');
@@ -61,14 +61,6 @@ describe('resendVerification handler', () => {
     expect(mockRedisInstance.setWithExpiry).toHaveBeenCalledWith('resend:test@school.edu', 'wait', 30); // Resend state stored
     expect(mockSend).toHaveBeenCalledWith(expect.any(SendEmailCommand)); // Email sent
     expect(successResponse).toHaveBeenCalledWith({ message: 'Verification code resent successfully' });
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = { queryStringParameters: { email: 'test@school.edu' } };
-    mockRedisInstance.get.mockRejectedValueOnce(new Error('Redis error'));
-    const result = await handler(event as any, {} as any, jest.fn());
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();
   });
 });

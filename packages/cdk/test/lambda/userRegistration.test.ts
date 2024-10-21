@@ -2,7 +2,7 @@
 import { handler } from '../../src/lambda/userRegistration';
 import { RedisClient } from '../../src/utils/redis';
 import { createUserInCognito, doesUserExistByEmail } from '../../src/utils/cognito';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 import { getSchoolKeyByEmail } from '../../src/utils/schoolInfo';
 import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
 
@@ -120,17 +120,6 @@ describe('userRegistration handler', () => {
 
     expect(doesUserExistByEmail).toHaveBeenCalledWith('existing@school.edu');
     expect(errorResponse).toHaveBeenCalledWith('User already exists with the provided email', 409);
-    expect(result).toBeUndefined();
-  });
-
-  it('should return exception response on error', async () => {
-    const event = {
-      queryStringParameters: { email: 'test@school.edu', authToken: 'auth_token' },
-      body: JSON.stringify({ username: 'testuser', password: 'Password123!' }),
-    };
-    (getAuthToken as jest.Mock).mockRejectedValueOnce(new Error('Redis error'));
-    const result = await handler(event as any, mockContext, mockCallback);
-    expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();
   });
 });

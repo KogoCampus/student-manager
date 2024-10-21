@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse } from '../utils/lambdaResponse';
 import { buildEmailParams } from '../utils/sendEmail';
 import { RedisClient } from '../utils/redis';
 
@@ -14,9 +14,7 @@ const RESEND_WAIT_TIME = 30; // 30 seconds wait time for resending the code
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
-  try {
     const email = event.queryStringParameters?.email;
-
     if (!email) {
       return errorResponse('Email query parameter is required', 400);
     }
@@ -26,7 +24,6 @@ export const handler: APIGatewayProxyHandler = async event => {
     // Check if the resend wait time has passed
     const resendKey = `resend:${email}`;
     const resendState = await redis.get(resendKey);
-
     if (resendState) {
       return errorResponse('Please wait before requesting a new verification code', 429); // Too many requests
     }
@@ -43,8 +40,4 @@ export const handler: APIGatewayProxyHandler = async event => {
     await SES.send(command);
 
     return successResponse({ message: 'Verification code resent successfully' });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    return exceptionResponse(error);
-  }
 };

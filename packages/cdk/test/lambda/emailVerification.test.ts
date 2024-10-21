@@ -3,7 +3,7 @@ import { handler } from '../../src/lambda/emailVerification';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { RedisClient } from '../../src/utils/redis';
 import { buildEmailParams } from '../../src/utils/sendEmail';
-import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
 
 // Mock the external dependencies
 jest.mock('@aws-sdk/client-ses');
