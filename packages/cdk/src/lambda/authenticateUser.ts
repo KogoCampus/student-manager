@@ -4,7 +4,6 @@ import { getUserDetailsFromAccessToken, refreshAccessToken } from '../utils/cogn
 import { getSchoolInfoByKey } from '../utils/schoolInfo';
 
 export const handler: APIGatewayProxyHandler = async event => {
-  try {
     const authorizationHeader = event.headers.Authorization || event.headers.authorization;
     const grantType = event.queryStringParameters?.grant_type;
 
@@ -53,8 +52,4 @@ export const handler: APIGatewayProxyHandler = async event => {
       default:
         return errorResponse('Invalid grant_type provided', 400);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    return exceptionResponse(error);
-  }
 };

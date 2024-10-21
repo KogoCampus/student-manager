@@ -14,24 +14,24 @@ const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
 export const handler: APIGatewayProxyHandler = async event => {
-    const email = event.queryStringParameters?.email;
+  const email = event.queryStringParameters?.email;
 
-    if (!email) {
-      return errorResponse('Email query parameter is required', 400);
-    }
+  if (!email) {
+    return errorResponse('Email query parameter is required', 400);
+  }
 
-    if (!isDesignatedSchoolEmail(email)) {
-      return errorResponse('Email is not from a designated school domain', 400);
-    }
+  if (!isDesignatedSchoolEmail(email)) {
+    return errorResponse('Email is not from a designated school domain', 400);
+  }
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const redis = RedisClient.getInstance();
-    // Set verification code with expiry in Redis
-    await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const redis = RedisClient.getInstance();
+  // Set verification code with expiry in Redis
+  await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
 
-    const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'welcome@kogocampus.com');
-    const command = new SendEmailCommand(emailParams);
-    await SES.send(command);
+  const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'welcome@kogocampus.com');
+  const command = new SendEmailCommand(emailParams);
+  await SES.send(command);
 
-    return successResponse({ message: 'Verification email sent' });
+  return successResponse({ message: 'Verification email sent' });
 };
