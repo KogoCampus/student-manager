@@ -83,14 +83,6 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    // Add IAM policy if needed, for example, if SES or other services are involved
-    verifyEmailCompleteLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: [],
-        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
-      }),
-    );
-
     // path: /student/verify-email/complete
     const verifyEmailCompleteIntegration = new apigateway.LambdaIntegration(verifyEmailCompleteLambda);
     studentResource.addResource('verify-email').addResource('complete').addMethod('POST', verifyEmailCompleteIntegration);
