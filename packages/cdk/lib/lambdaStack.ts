@@ -22,6 +22,9 @@ export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
+    const sentryLayerArn = 'arn:aws:lambda:us-west-2:943013980633:layer:SentryNodeServerlessSDK:281';
+    const sentryLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'SentryLayer', sentryLayerArn);
+
     const api = apigateway.RestApi.fromRestApiAttributes(this, 'ImportedApi', {
       restApiId: awsImport.apigateway.restApiId,
       rootResourceId: awsImport.apigateway.rootResourceId,
@@ -39,6 +42,11 @@ export class LambdaStack extends cdk.Stack {
       COGNITO_USER_POOL_ID: awsImport.cognito.userPoolId,
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
+    const sentryEnv = {
+      NODE_OPTIONS: "-r @sentry/aws-serverless/awslambda-auto",
+      SENTRY_DSN: awsImport.sentry.dsn,
+      SENTRY_TRACES_SAMPLE_RATE: "1.0",
+    };
 
     // =================================================================
     // Email Verification Lambda
@@ -54,7 +62,9 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
 
     // Add IAM policy to allow Lambda to send emails using SES
@@ -81,7 +91,9 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],  
     });
 
     // path: /student/verify-email/complete
@@ -99,7 +111,9 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
 
     // Add IAM policy to allow Lambda to send emails using SES
@@ -126,7 +140,9 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
 
     // Add IAM policy to allow Lambda to manage Cognito users
@@ -157,7 +173,9 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
     signInLambda.addToRolePolicy(
       new iam.PolicyStatement({
@@ -182,7 +200,9 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
 
     // Add IAM policy to allow Lambda to manage Cognito users
@@ -208,7 +228,9 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
     authenticateUserLambda.addToRolePolicy(
       new iam.PolicyStatement({
@@ -231,7 +253,9 @@ export class LambdaStack extends cdk.Stack {
       vpc,
       environment: {
         ...elasticCacheEnv,
+        ...sentryEnv,
       },
+      layers: [sentryLayer],
     });
 
     // Add IAM policy for sending emails via SES (if the report sends notifications)
