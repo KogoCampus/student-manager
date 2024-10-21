@@ -35,13 +35,37 @@ paths:
             application/json:
               schema:
                 type: object
+                description: Response when grant_type is refresh_token
                 properties:
+                  userdata:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+                      schoolInfo:
+                        type: object
+                        description: School information of the user
+                        properties:
+                          domain:
+                            type: string
+                            example: "@sfu.ca"
+                          name:
+                            type: string
+                            example: Simon Fraser University
+                          shortenedName:
+                            type: string
+                            example: sfu
+                  access_token:
+                    type: string
+                    description: New access token
+                    example: newAccessToken
                   message:
                     type: string
                     example: Access token refreshed successfully
-                  accessToken:
-                    type: string
-                    description: New access token (if grant_type=refresh_token)
         "400":
           description: Bad request - missing or invalid parameters
         "500":
@@ -64,10 +88,65 @@ paths:
           description: Bad request - missing or invalid parameters
         "500":
           description: Internal server error
+  /student/verify-email/complete:
+    post:
+      summary: Complete email verification
+      description: Validates the verification code sent to the student's email and
+        returns an authorization token if successful.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student to verify.
+          schema:
+            type: string
+        - name: verificationCode
+          in: query
+          required: true
+          description: The 6-digit verification code sent to the email.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Email verified successfully and an authorization token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email verified successfully.
+                  authToken:
+                    type: string
+                    description: Authorization token for further authentication
+                    example: eyJhbGciOiJIUzI1NiIsInR5...
+        "400":
+          description: Bad request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email and verification code are required
+        "401":
+          description: Invalid or expired verification code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid verification code
+        "500":
+          description: Internal server error
   /student/password-reset:
     post:
       summary: Reset password for a student
-      description: Resets the password for a student after email verification code
+      description: Resets the password for a student after the authorization token
         validation.
       requestBody:
         description: The new password for the student
@@ -87,10 +166,10 @@ paths:
           description: The email address of the student.
           schema:
             type: string
-        - name: verificationCode
+        - name: authToken
           in: query
           required: true
-          description: The verification code sent to the student's email.
+          description: The authorization token provided after email verification.
           schema:
             type: string
       responses:
@@ -106,6 +185,8 @@ paths:
                     example: Password reset successfully
         "400":
           description: Bad request - missing or invalid parameters
+        "401":
+          description: Unauthorized - Invalid or expired authorization token
         "404":
           description: Not found - user does not exist
         "500":
@@ -126,6 +207,37 @@ paths:
           description: Verification email resent
         "429":
           description: Too many requests - please wait before resending
+        "500":
+          description: Internal server error
+  /student/report:
+    post:
+      summary: Report a content or a user
+      description: Sends a report to the admin
+      requestBody:
+        description: The report data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contentType:
+                  type: string
+                  description: The type of the content or user.
+                contentId:
+                  type: string
+                  description: The Id of the content or user.
+                reportDetails:
+                  type: string
+                  description: The details for the report.
+                reporterId:
+                  type: string
+                  description: The Id of the reporter.
+      responses:
+        "200":
+          description: Report sent successfully
+        "400":
+          description: Bad request - missing or invalid parameters
         "500":
           description: Internal server error
   /student/signin:
@@ -176,10 +288,23 @@ paths:
   /student/register:
     post:
       summary: Register a student
-      description: Registers a student after verification code validation and returns
+      description: Registers a student after email verification and returns
         authentication tokens.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student.
+          schema:
+            type: string
+        - name: authToken
+          in: query
+          required: true
+          description: The authorization token received after email verification.
+          schema:
+            type: string
       requestBody:
-        description: The username and password for the student registration
+        description: The username and password for student registration.
         required: true
         content:
           application/json:
@@ -192,22 +317,12 @@ paths:
                 password:
                   type: string
                   description: The desired password for the new student.
-      parameters:
-        - name: email
-          in: query
-          required: true
-          description: The email address of the student.
-          schema:
-            type: string
-        - name: verificationCode
-          in: query
-          required: true
-          description: The verification code sent to the student's email.
-          schema:
-            type: string
+              required:
+                - username
+                - password
       responses:
         "200":
-          description: Student successfully registered and tokens returned
+          description: Student successfully registered and tokens returned.
           content:
             application/json:
               schema:
@@ -218,14 +333,42 @@ paths:
                     example: User successfully created
                   accessToken:
                     type: string
-                    description: Access token for API authorization
+                    description: Access token for API authorization.
                   idToken:
                     type: string
-                    description: ID token for user identification
+                    description: ID token for user identification.
                   refreshToken:
                     type: string
-                    description: Token used to refresh the access token
+                    description: Token used to refresh the access token.
         "400":
-          description: Bad request - missing or invalid parameters
+          description: Bad request - missing or invalid parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email and authorization token are required
+        "401":
+          description: Unauthorized - Invalid or expired authorization token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired authorization token
+        "409":
+          description: Conflict - User already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User already exists with the provided email
         "500":
-          description: Internal server error
+          description: Internal server error.
