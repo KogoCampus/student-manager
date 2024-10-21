@@ -67,7 +67,8 @@ export class LambdaStack extends cdk.Stack {
 
     // path: /student/verify-email
     const emailVerificationIntegration = new apigateway.LambdaIntegration(emailVerificationLambda);
-    studentResource.addResource('verify-email').addMethod('POST', emailVerificationIntegration);
+    const verifyEmailResource = studentResource.addResource('verify-email');
+    verifyEmailResource.addMethod('POST', emailVerificationIntegration);
 
     // =================================================================
     // Verify Email Complete Lambda
@@ -85,7 +86,7 @@ export class LambdaStack extends cdk.Stack {
 
     // path: /student/verify-email/complete
     const verifyEmailCompleteIntegration = new apigateway.LambdaIntegration(verifyEmailCompleteLambda);
-    studentResource.addResource('verify-email').addResource('complete').addMethod('POST', verifyEmailCompleteIntegration);
+    verifyEmailResource.addResource('complete').addMethod('POST', verifyEmailCompleteIntegration);
 
     // =================================================================
     // Resend Verification Lambda
