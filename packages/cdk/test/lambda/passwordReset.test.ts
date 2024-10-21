@@ -3,11 +3,13 @@ import { handler } from '../../src/lambda/passwordReset';
 import { RedisClient } from '../../src/utils/redis';
 import { resetUserPassword, doesUserExistByEmail } from '../../src/utils/cognito';
 import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
+import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
 
 // Mock external dependencies
 jest.mock('../../src/utils/redis');
 jest.mock('../../src/utils/cognito');
 jest.mock('../../src/utils/lambdaResponse');
+jest.mock('../../src/utils/authToken');
 
 // Mock context and callback
 const mockContext = {} as any;
@@ -27,25 +29,33 @@ describe('passwordReset handler', () => {
     jest.clearAllMocks();
   });
 
-  it('should return 400 if email or verification code is missing', async () => {
+  it('should return 400 if email or authToken is missing', async () => {
     const event = { queryStringParameters: {} };
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('Email and verification code are required', 400);
+    expect(errorResponse).toHaveBeenCalledWith('Email and authorization token are required', 400);
     expect(result).toBeUndefined();
   });
 
-  it('should return 400 if the verification code is invalid or expired', async () => {
-    const event = { queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' } };
-    mockRedisInstance.get.mockResolvedValueOnce(null);
+  it('should return 401 if the authToken is invalid or expired', async () => {
+    const event = { queryStringParameters: { email: 'test@school.edu', authToken: 'invalid_token' } };
+    (getAuthToken as jest.Mock).mockResolvedValueOnce(null); // Simulate missing or expired token
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('Verification code has expired or does not exist', 400);
+    expect(errorResponse).toHaveBeenCalledWith('Authorization token has expired or does not exist', 401);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return 401 if the authToken does not match the stored one', async () => {
+    const event = { queryStringParameters: { email: 'test@school.edu', authToken: 'wrong_token' } };
+    (getAuthToken as jest.Mock).mockResolvedValueOnce('correct_token'); // Simulate different stored token
+    const result = await handler(event as any, mockContext, mockCallback);
+    expect(errorResponse).toHaveBeenCalledWith('Invalid authorization token', 401);
     expect(result).toBeUndefined();
   });
 
   it('should return 404 if the user does not exist', async () => {
-    const event = { queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' } };
-    mockRedisInstance.get.mockResolvedValueOnce('123456');
-    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(false);
+    const event = { queryStringParameters: { email: 'test@school.edu', authToken: 'correct_token' } };
+    (getAuthToken as jest.Mock).mockResolvedValueOnce('correct_token'); // Simulate matching token
+    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(false); // Simulate user not existing
     const result = await handler(event as any, mockContext, mockCallback);
     expect(errorResponse).toHaveBeenCalledWith('User does not exist with the provided email', 404);
     expect(result).toBeUndefined();
@@ -53,33 +63,33 @@ describe('passwordReset handler', () => {
 
   it('should return 400 if the new password is missing', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'correct_token' },
       body: JSON.stringify({}),
     };
-    mockRedisInstance.get.mockResolvedValueOnce('123456');
-    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(true);
+    (getAuthToken as jest.Mock).mockResolvedValueOnce('correct_token'); // Simulate matching token
+    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(true); // Simulate user exists
     const result = await handler(event as any, mockContext, mockCallback);
     expect(errorResponse).toHaveBeenCalledWith('New password is required', 400);
     expect(result).toBeUndefined();
   });
 
-  it('should reset the user password and clear the Redis code', async () => {
+  it('should reset the user password and delete the authToken', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'correct_token' },
       body: JSON.stringify({ newPassword: 'NewPassword123!' }),
     };
-    mockRedisInstance.get.mockResolvedValueOnce('123456');
-    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(true);
+    (getAuthToken as jest.Mock).mockResolvedValueOnce('correct_token'); // Simulate matching token
+    (doesUserExistByEmail as jest.Mock).mockResolvedValueOnce(true); // Simulate user exists
     const result = await handler(event as any, mockContext, mockCallback);
     expect(resetUserPassword).toHaveBeenCalledWith('test@school.edu', 'NewPassword123!');
-    expect(mockRedisInstance.delete).toHaveBeenCalledWith('test@school.edu');
+    expect(deleteAuthToken).toHaveBeenCalledWith('test@school.edu');
     expect(successResponse).toHaveBeenCalledWith({ message: 'Password reset successfully' });
     expect(result).toBeUndefined();
   });
 
   it('should return exception response on error', async () => {
-    const event = { queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' } };
-    mockRedisInstance.get.mockRejectedValueOnce(new Error('Redis error'));
+    const event = { queryStringParameters: { email: 'test@school.edu', authToken: 'correct_token' } };
+    (getAuthToken as jest.Mock).mockRejectedValueOnce(new Error('Redis error'));
     const result = await handler(event as any, mockContext, mockCallback);
     expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();

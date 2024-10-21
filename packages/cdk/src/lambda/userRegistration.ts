@@ -1,38 +1,36 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
-import { RedisClient } from '../utils/redis';
+import { getAuthToken, deleteAuthToken } from '../utils/authToken';
 import { createUserInCognito, doesUserExistByEmail } from '../utils/cognito';
 import { getSchoolKeyByEmail } from '../utils/schoolInfo';
 
 export const handler: APIGatewayProxyHandler = async event => {
   try {
     const email = event.queryStringParameters?.email;
-    const submittedCode = event.queryStringParameters?.verificationCode;
-    if (!email || !submittedCode) {
-      return errorResponse('Email and verification code are required', 400);
+    const authToken = event.queryStringParameters?.authToken;
+
+    if (!email || !authToken) {
+      return errorResponse('Email and authorization token are required', 400);
     }
 
     // Get username and password from the request body
-    const schoolKey = getSchoolKeyByEmail(email);
     const requestBody = JSON.parse(event.body || '{}');
     const { username, password } = requestBody;
+
+    // Check if username and password are provided
     if (!username || !password) {
       return errorResponse('Username and password are required in the request body', 400);
     }
 
-    const redis = RedisClient.getInstance();
-
-    // Retrieve the verification code from Redis
-    const storedCode = await redis.get(email);
-    if (!storedCode) {
-      return errorResponse('No verification code found or it has expired', 400);
-    }
-    if (submittedCode !== storedCode) {
-      return errorResponse('Invalid verification code', 400);
+    // Verify the auth token after checking username and password
+    const storedAuthToken = await getAuthToken(email);
+    if (!storedAuthToken) {
+      return errorResponse('No authorization token found or it has expired', 401);
     }
 
-    // Verification successful, delete the code from Redis
-    await redis.delete(email);
+    if (authToken !== storedAuthToken) {
+      return errorResponse('Invalid authorization token', 401);
+    }
 
     // Check if a user with the same email already exists
     const doesUserExist = await doesUserExistByEmail(email);
@@ -40,7 +38,13 @@ export const handler: APIGatewayProxyHandler = async event => {
       return errorResponse('User already exists with the provided email', 409);
     }
 
+    // Proceed with user registration in Cognito
+    const schoolKey = getSchoolKeyByEmail(email);
     const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, username, password, schoolKey);
+
+    // Upon successful registration, delete the auth token from Redis
+    await deleteAuthToken(email);
+
     return successResponse({
       message: 'User successfully created',
       accessToken: AccessToken,

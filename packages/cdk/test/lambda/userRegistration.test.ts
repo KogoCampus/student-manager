@@ -4,12 +4,14 @@ import { RedisClient } from '../../src/utils/redis';
 import { createUserInCognito, doesUserExistByEmail } from '../../src/utils/cognito';
 import { successResponse, errorResponse, exceptionResponse } from '../../src/utils/lambdaResponse';
 import { getSchoolKeyByEmail } from '../../src/utils/schoolInfo';
+import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
 
 // Mock the external dependencies
 jest.mock('../../src/utils/redis');
 jest.mock('../../src/utils/cognito');
 jest.mock('../../src/utils/lambdaResponse');
 jest.mock('../../src/utils/schoolInfo');
+jest.mock('../../src/utils/authToken');
 
 // Mock context and callback
 const mockContext = {} as any;
@@ -33,16 +35,16 @@ describe('userRegistration handler', () => {
     jest.clearAllMocks();
   });
 
-  it('should return 400 if email or verification code is not provided', async () => {
+  it('should return 400 if email or authToken is not provided', async () => {
     const event = { queryStringParameters: {} };
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('Email and verification code are required', 400);
+    expect(errorResponse).toHaveBeenCalledWith('Email and authorization token are required', 400);
     expect(result).toBeUndefined(); // No direct return needed, response handled by mocks
   });
 
   it('should return 400 if username or password is not provided', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'auth_token' },
       body: JSON.stringify({ username: '' }),
     };
     const result = await handler(event as any, mockContext, mockCallback);
@@ -50,35 +52,35 @@ describe('userRegistration handler', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should return 400 if no verification code is found in Redis', async () => {
+  it('should return 401 if no authToken is found in Redis', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'auth_token' },
       body: JSON.stringify({ username: 'testuser', password: 'Password123!' }),
     };
-    mockRedisInstance.get.mockResolvedValue(null); // Simulate no stored code in Redis
+    (getAuthToken as jest.Mock).mockResolvedValue(null); // Simulate no stored token in Redis
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('No verification code found or it has expired', 400);
+    expect(errorResponse).toHaveBeenCalledWith('No authorization token found or it has expired', 401);
     expect(result).toBeUndefined();
   });
 
-  it('should return 400 if the submitted verification code does not match the stored one', async () => {
+  it('should return 401 if the submitted authToken does not match the stored one', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: 'wrongcode' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'wrong_token' },
       body: JSON.stringify({ username: 'testuser', password: 'Password123!' }),
     };
-    mockRedisInstance.get.mockResolvedValue('123456'); // Simulate stored code in Redis
+    (getAuthToken as jest.Mock).mockResolvedValue('auth_token'); // Simulate stored token in Redis
     const result = await handler(event as any, mockContext, mockCallback);
-    expect(errorResponse).toHaveBeenCalledWith('Invalid verification code', 400);
+    expect(errorResponse).toHaveBeenCalledWith('Invalid authorization token', 401);
     expect(result).toBeUndefined();
   });
 
-  it('should delete the code from Redis and create a new user in Cognito, returning tokens', async () => {
+  it('should delete the authToken from Redis and create a new user in Cognito, returning tokens', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'auth_token' },
       body: JSON.stringify({ username: 'testuser', password: 'Password123!' }),
     };
 
-    mockRedisInstance.get.mockResolvedValue('123456'); // Simulate matching code in Redis
+    (getAuthToken as jest.Mock).mockResolvedValue('auth_token'); // Simulate matching token in Redis
     (createUserInCognito as jest.Mock).mockResolvedValue({
       AccessToken: 'access_token',
       IdToken: 'id_token',
@@ -87,7 +89,7 @@ describe('userRegistration handler', () => {
 
     const result = await handler(event as any, mockContext, mockCallback);
 
-    expect(mockRedisInstance.delete).toHaveBeenCalledWith('test@school.edu');
+    expect(deleteAuthToken).toHaveBeenCalledWith('test@school.edu');
     expect(createUserInCognito).toHaveBeenCalledWith('test@school.edu', 'testuser', 'Password123!', 'school123');
     expect(successResponse).toHaveBeenCalledWith({
       message: 'User successfully created',
@@ -100,11 +102,11 @@ describe('userRegistration handler', () => {
 
   it('should return 409 if a user already exists with the provided email', async () => {
     const event = {
-      queryStringParameters: { email: 'existing@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'existing@school.edu', authToken: 'auth_token' },
       body: JSON.stringify({ username: 'existinguser', password: 'Password123!' }),
     };
 
-    mockRedisInstance.get.mockResolvedValue('123456'); // Simulate matching code in Redis
+    (getAuthToken as jest.Mock).mockResolvedValue('auth_token'); // Simulate matching token in Redis
     (createUserInCognito as jest.Mock).mockResolvedValue({
       AccessToken: 'access_token',
       IdToken: 'id_token',
@@ -123,10 +125,10 @@ describe('userRegistration handler', () => {
 
   it('should return exception response on error', async () => {
     const event = {
-      queryStringParameters: { email: 'test@school.edu', verificationCode: '123456' },
+      queryStringParameters: { email: 'test@school.edu', authToken: 'auth_token' },
       body: JSON.stringify({ username: 'testuser', password: 'Password123!' }),
     };
-    mockRedisInstance.get.mockRejectedValueOnce(new Error('Redis error'));
+    (getAuthToken as jest.Mock).mockRejectedValueOnce(new Error('Redis error'));
     const result = await handler(event as any, mockContext, mockCallback);
     expect(exceptionResponse).toHaveBeenCalledWith(new Error('Redis error'));
     expect(result).toBeUndefined();

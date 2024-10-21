@@ -1,25 +1,25 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { doesUserExistByEmail, resetUserPassword } from '../utils/cognito';
 import { successResponse, errorResponse, exceptionResponse } from '../utils/lambdaResponse';
-import { RedisClient } from '../utils/redis';
+import { getAuthToken, deleteAuthToken } from '../utils/authToken';
 
 export const handler: APIGatewayProxyHandler = async event => {
   try {
     const email = event.queryStringParameters?.email;
-    const verificationCode = event.queryStringParameters?.verificationCode;
+    const authToken = event.queryStringParameters?.authToken;
 
-    if (!email || !verificationCode) {
-      return errorResponse('Email and verification code are required', 400);
+    if (!email || !authToken) {
+      return errorResponse('Email and authorization token are required', 400);
     }
 
-    // Verify the email and verification code using Redis
-    const redis = RedisClient.getInstance();
-    const storedCode = await redis.get(email);
-    if (!storedCode) {
-      return errorResponse('Verification code has expired or does not exist', 400);
+    // Verify the auth token
+    const storedAuthToken = await getAuthToken(email);
+    if (!storedAuthToken) {
+      return errorResponse('Authorization token has expired or does not exist', 401);
     }
-    if (storedCode !== verificationCode) {
-      return errorResponse('Invalid verification code', 400);
+
+    if (storedAuthToken !== authToken) {
+      return errorResponse('Invalid authorization token', 401);
     }
 
     const userExists = await doesUserExistByEmail(email);
@@ -34,8 +34,11 @@ export const handler: APIGatewayProxyHandler = async event => {
       return errorResponse('New password is required', 400);
     }
 
+    // Reset the user password
     await resetUserPassword(email, newPassword);
-    await redis.delete(email);
+
+    // Remove the auth token after successful password reset
+    await deleteAuthToken(email);
 
     return successResponse({ message: 'Password reset successfully' });
 

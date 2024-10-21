@@ -70,6 +70,32 @@ export class LambdaStack extends cdk.Stack {
     studentResource.addResource('verify-email').addMethod('POST', emailVerificationIntegration);
 
     // =================================================================
+    // Verify Email Complete Lambda
+    // =================================================================
+    const verifyEmailCompleteLambda = new lambda.Function(this, 'VerifyEmailCompleteHandler', {
+      runtime: nodeVersion.lambaRuntime,
+      code: lambda.Code.fromAsset('dist/lambda'),
+      handler: 'verifyEmailComplete.handler',
+      vpc,
+      securityGroups: [props.securityGroup],
+      environment: {
+        ...elasticCacheEnv,
+      },
+    });
+
+    // Add IAM policy if needed, for example, if SES or other services are involved
+    verifyEmailCompleteLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [],
+        resources: [awsImport.ses.sesIdentityArn, awsImport.ses.sesConfigurationSetArn],
+      }),
+    );
+
+    // path: /student/verify-email/complete
+    const verifyEmailCompleteIntegration = new apigateway.LambdaIntegration(verifyEmailCompleteLambda);
+    studentResource.addResource('verify-email').addResource('complete').addMethod('POST', verifyEmailCompleteIntegration);
+
+    // =================================================================
     // Resend Verification Lambda
     // =================================================================
     const resendVerificationLambda = new lambda.Function(this, 'ResendVerificationHandler', {

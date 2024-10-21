@@ -24,9 +24,22 @@ openapi:
     /student/register:
       post:
         summary: Register a student
-        description: Registers a student after verification code validation and returns authentication tokens.
+        description: Registers a student after email verification and returns authentication tokens.
+        parameters:
+          - name: email
+            in: query
+            required: true
+            description: The email address of the student.
+            schema:
+              type: string
+          - name: authToken
+            in: query
+            required: true
+            description: The authorization token received after email verification.
+            schema:
+              type: string
         requestBody:
-          description: The username and password for the student registration
+          description: The username and password for student registration.
           required: true
           content:
             application/json:
@@ -39,22 +52,12 @@ openapi:
                   password:
                     type: string
                     description: The desired password for the new student.
-        parameters:
-          - name: email
-            in: query
-            required: true
-            description: The email address of the student.
-            schema:
-              type: string
-          - name: verificationCode
-            in: query
-            required: true
-            description: The verification code sent to the student's email.
-            schema:
-              type: string
+                required:
+                  - username
+                  - password
         responses:
           '200':
-            description: Student successfully registered and tokens returned
+            description: Student successfully registered and tokens returned.
             content:
               application/json:
                 schema:
@@ -65,15 +68,15 @@ openapi:
                       example: "User successfully created"
                     accessToken:
                       type: string
-                      description: Access token for API authorization
+                      description: Access token for API authorization.
                     idToken:
                       type: string
-                      description: ID token for user identification
+                      description: ID token for user identification.
                     refreshToken:
                       type: string
-                      description: Token used to refresh the access token
+                      description: Token used to refresh the access token.
           '400':
-            description: Bad request - missing or invalid parameters
+            description: Bad request - missing or invalid parameters.
             content:
               application/json:
                 schema:
@@ -81,9 +84,19 @@ openapi:
                   properties:
                     message:
                       type: string
-                      example: "Email and verification code are required"
+                      example: "Email and authorization token are required"
+          '401':
+            description: Unauthorized - Invalid or expired authorization token.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Invalid or expired authorization token"
           '409':
-            description: Conflict - User already exists
+            description: Conflict - User already exists.
             content:
               application/json:
                 schema:
@@ -93,4 +106,4 @@ openapi:
                       type: string
                       example: "User already exists with the provided email"
           '500':
-            description: Internal server error
+            description: Internal server error.
