@@ -3,7 +3,7 @@ serverless:
     ResendVerificationFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/resendVerification.handler
+        Handler: lambda/resendVerification.handlerImplementation
         Runtime: nodejs20.x
         CodeUri: .
         Environment:

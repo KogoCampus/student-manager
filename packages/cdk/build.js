@@ -38,7 +38,7 @@ const scanLambdaHandlers = dir => {
     .map(file => path.join(dir, file));
 
   // Print out the handlers in green
-  console.log(color('    Found Lambda handlers:', greenText));
+  console.log(color('Found Lambda handlers:', blueText));
   handlers.forEach(handler => {
     console.log(color(`  ${handler}`, greenText));
   });

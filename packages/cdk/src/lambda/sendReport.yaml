@@ -3,7 +3,7 @@ serverless:
     SendReportFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/sendReport.handler
+        Handler: lambda/sendReport.handlerImplementation
         Runtime: nodejs20.x
         CodeUri: .
         Environment:
