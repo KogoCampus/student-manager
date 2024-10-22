@@ -40,6 +40,9 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     // Environment Variables
     // =================================================================
+    const defaultEnv = {
+      NODE_OPTIONS: '--enable-source-maps',
+    };
     const elasticCacheEnv = {
       REDIS_ENDPOINT: props.redisEndpoint,
       REDIS_PORT: props.redisPort,
@@ -58,6 +61,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'emailVerification.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
       },
       layers: [sentryLayer],
@@ -85,6 +89,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'emailVerificationComplete.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
       },
       layers: [sentryLayer],
@@ -103,6 +108,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'resendVerification.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
       },
       layers: [sentryLayer],
@@ -129,6 +135,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'userRegistration.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
         ...cognitoEnv,
       },
@@ -161,6 +168,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'signIn.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...cognitoEnv,
       },
       layers: [sentryLayer],
@@ -185,6 +193,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'passwordReset.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
         ...cognitoEnv,
       },
@@ -212,6 +221,7 @@ export class LambdaStack extends cdk.Stack {
       handler: 'authenticateUser.handler',
       securityGroups: [props.securityGroup],
       environment: {
+        ...defaultEnv,
         ...cognitoEnv,
       },
       layers: [sentryLayer],
@@ -235,6 +245,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset('dist/lambda/sendReport'),
       handler: 'sendReport.handler',
       environment: {
+        ...defaultEnv,
         ...elasticCacheEnv,
       },
       layers: [sentryLayer],

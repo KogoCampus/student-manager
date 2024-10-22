@@ -17,7 +17,7 @@ const commonOptions = {
   platform: 'node',
   target: 'node20',
   external: ['aws-sdk'], // AWS SDK v2 is provided in the Lambda runtime, no need to bundle it
-  sourcemap: false,
+  sourcemap: true,
 };
 
 // =================================================================
