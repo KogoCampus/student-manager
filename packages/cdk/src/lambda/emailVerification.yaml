@@ -3,7 +3,7 @@ serverless:
     EmailVerificationFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/emailVerification.handlerImplementation
+        Handler: lambda/emailVerification/emailVerification.handlerImplementation
         Runtime: nodejs20.x
         CodeUri: .
         Environment:

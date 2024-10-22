@@ -47,11 +47,29 @@ const scanLambdaHandlers = dir => {
 };
 
 const lambdaDir = path.join(__dirname, 'src', 'lambda');
-const lambdaBuild = {
-  entryPoints: scanLambdaHandlers(lambdaDir),
-  outdir: 'dist/lambda',
-  format: 'cjs',
-  ...commonOptions,
+const lambdaHandlers = scanLambdaHandlers(lambdaDir);
+
+// =================================================================
+// Dynamic build for each Lambda handler to its own directory
+const buildLambdaHandlers = () => {
+  const buildPromises = lambdaHandlers.map(handler => {
+    const handlerName = path.basename(handler, '.ts'); // e.g., emailVerification
+    const outDir = path.join('dist', 'lambda', handlerName); // e.g., dist/lambda/emailVerification
+
+    return esbuild.build({
+      entryPoints: [handler],
+      outdir: outDir, // Output to individual directory
+      format: 'cjs',
+      ...commonOptions,
+    }).then(() => {
+      console.log(color(`Lambda build complete for ${handlerName} (${outDir})`, blueText));
+    }).catch(err => {
+      console.error(color(`Build failed for ${handlerName}`, redText));
+      console.error(err);
+    });
+  });
+
+  return Promise.all(buildPromises);
 };
 
 // =================================================================
@@ -70,7 +88,7 @@ const assembleOpenApiDocs = () => {
     servers: [
       {
         url: 'https://api.staging.kogocampus.com',
-        description: 'Delievered via AWS API Gateway',
+        description: 'Delivered via AWS API Gateway',
       },
     ],
     paths: {},
@@ -128,10 +146,9 @@ const assembleSamTemplate = () => {
 // Build Script
 console.log(color('Building the project...', blueText));
 
-esbuild
-  .build(lambdaBuild)
+buildLambdaHandlers()
   .then(() => {
-    console.log(color('Lambda build complete (dist/lambda)', blueText));
+    console.log(color('All Lambda builds complete', blueText));
     return esbuild.build(cdkBuild);
   })
   .then(() => {

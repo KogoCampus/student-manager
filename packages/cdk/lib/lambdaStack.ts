@@ -54,7 +54,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/emailVerification.js'),
+      code: lambda.Code.fromAsset('dist/lambda/emailVerification'),
       handler: 'emailVerification.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -81,7 +81,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const verifyEmailCompleteLambda = new lambda.Function(this, 'VerifyEmailCompleteHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/emailVerificationComplete.js'),
+      code: lambda.Code.fromAsset('dist/lambda/emailVerificationComplete'),
       handler: 'emailVerificationComplete.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -99,7 +99,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const resendVerificationLambda = new lambda.Function(this, 'ResendVerificationHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/resendVerification.js'),
+      code: lambda.Code.fromAsset('dist/lambda/resendVerification'),
       handler: 'resendVerification.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -125,7 +125,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const userRegistrationLambda = new lambda.Function(this, 'UserRegistrationHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/userRegistration.js'),
+      code: lambda.Code.fromAsset('dist/lambda/userRegistration'),
       handler: 'userRegistration.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -157,7 +157,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const signInLambda = new lambda.Function(this, 'SignInHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/signIn.js'),
+      code: lambda.Code.fromAsset('dist/lambda/signIn'),
       handler: 'signIn.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -181,7 +181,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const passwordResetLambda = new lambda.Function(this, 'PasswordResetHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/passwordReset.js'),
+      code: lambda.Code.fromAsset('dist/lambda/passwordReset'),
       handler: 'passwordReset.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -208,7 +208,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const authenticateUserLambda = new lambda.Function(this, 'AuthenticateUserHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/authenticateUser.js'),
+      code: lambda.Code.fromAsset('dist/lambda/authenticateUser'),
       handler: 'authenticateUser.handler',
       securityGroups: [props.securityGroup],
       environment: {
@@ -232,7 +232,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const sendReportLambda = new lambda.Function(this, 'SendReportHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/report.js'),
+      code: lambda.Code.fromAsset('dist/lambda/report'),
       handler: 'sendReport.handler',
       environment: {
         ...elasticCacheEnv,
