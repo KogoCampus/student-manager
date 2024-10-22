@@ -1,7 +1,7 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
-import { buildEmailParams } from '../utils/sendEmail';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
+import { buildEmailParams } from '../utils/emailService';
 import { RedisClient } from '../utils/redis';
 import { isDesignatedSchoolEmail } from '../utils/schoolInfo';
 
@@ -13,7 +13,7 @@ const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)
 // SES Client
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
 
   if (!email) {
@@ -35,3 +35,5 @@ export const handler: APIGatewayProxyHandler = async event => {
 
   return successResponse({ message: 'Verification email sent' });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

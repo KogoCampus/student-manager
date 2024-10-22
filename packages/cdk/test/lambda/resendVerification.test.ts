@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { handler } from '../../src/lambda/resendVerification';
+import { handlerImplementation as handler } from '../../src/lambda/resendVerification';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { RedisClient } from '../../src/utils/redis';
-import { buildEmailParams } from '../../src/utils/sendEmail';
-import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
+import { buildEmailParams } from '../../src/utils/emailService';
+import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
 
 // Mock the external dependencies
 jest.mock('@aws-sdk/client-ses');
 jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/sendEmail');
-jest.mock('../../src/utils/lambdaResponse');
+jest.mock('../../src/utils/emailService');
+jest.mock('../../src/utils/handlerUtil');
 
 describe('resendVerification handler', () => {
   const mockSend = jest.fn();

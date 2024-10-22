@@ -1,10 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
 import { getAuthToken, deleteAuthToken } from '../utils/authToken';
 import { createUserInCognito, doesUserExistByEmail } from '../utils/cognito';
 import { getSchoolKeyByEmail } from '../utils/schoolInfo';
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
   const authToken = event.queryStringParameters?.authToken;
 
@@ -49,3 +49,5 @@ export const handler: APIGatewayProxyHandler = async event => {
     refreshToken: RefreshToken,
   });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

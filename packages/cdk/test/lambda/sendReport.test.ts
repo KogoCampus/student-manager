@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { handler } from '../../src/lambda/sendReport';
+import { handlerImplementation as handler } from '../../src/lambda/sendReport';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
-import { buildEmailParams } from '../../src/utils/sendEmail';
+import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
+import { buildEmailParams } from '../../src/utils/emailService';
 
 // Mock the external dependencies
 jest.mock('@aws-sdk/client-ses');
-jest.mock('../../src/utils/sendEmail');
+jest.mock('../../src/utils/emailService');
 
 const mockContext = {} as any;
 const mockCallback = jest.fn();

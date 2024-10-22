@@ -7,11 +7,6 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 import awsImport from '../secrets/awsImport.decrypted.json';
 
-const nodeVersion = {
-  lambaRuntime: lambda.Runtime.NODEJS_20_X,
-  runtime: 'nodejs20.x',
-};
-
 interface LambdaStackProps extends cdk.StackProps {
   redisEndpoint: string;
   redisPort: string;
@@ -21,6 +16,17 @@ interface LambdaStackProps extends cdk.StackProps {
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
+      vpcId: awsImport.vpc.vpcId,
+    });
+
+    const defaultLambdaConfig = {
+      vpc,
+      runtime: lambda.Runtime.NODEJS_20_X, // Runtime configuration
+      memorySize: 512, // Default memory size (MB)
+      timeout: cdk.Duration.seconds(15), // Default timeout (seconds)
+    };
 
     const sentryLayerArn = 'arn:aws:lambda:us-west-2:943013980633:layer:SentryNodeServerlessSDK:281';
     const sentryLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'SentryLayer', sentryLayerArn);
@@ -42,27 +48,17 @@ export class LambdaStack extends cdk.Stack {
       COGNITO_USER_POOL_ID: awsImport.cognito.userPoolId,
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
     };
-    const sentryEnv = {
-      NODE_OPTIONS: '-r @sentry/aws-serverless/awslambda-auto',
-      SENTRY_DSN: awsImport.sentry.dsn,
-      SENTRY_TRACES_SAMPLE_RATE: '1.0',
-    };
 
     // =================================================================
     // Email Verification Lambda
     // =================================================================
-    const vpc = ec2.Vpc.fromLookup(this, awsImport.vpc.vpcName, {
-      vpcId: awsImport.vpc.vpcId,
-    });
     const emailVerificationLambda = new lambda.Function(this, 'EmailVerificationHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/emailVerification.js'),
       handler: 'emailVerification.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -84,14 +80,12 @@ export class LambdaStack extends cdk.Stack {
     // Verify Email Complete Lambda
     // =================================================================
     const verifyEmailCompleteLambda = new lambda.Function(this, 'VerifyEmailCompleteHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/emailVerificationComplete.js'),
       handler: 'emailVerificationComplete.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -104,14 +98,12 @@ export class LambdaStack extends cdk.Stack {
     // Resend Verification Lambda
     // =================================================================
     const resendVerificationLambda = new lambda.Function(this, 'ResendVerificationHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/resendVerification.js'),
       handler: 'resendVerification.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -132,15 +124,13 @@ export class LambdaStack extends cdk.Stack {
     // User Registration Lambda
     // =================================================================
     const userRegistrationLambda = new lambda.Function(this, 'UserRegistrationHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/userRegistration.js'),
       handler: 'userRegistration.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -166,14 +156,12 @@ export class LambdaStack extends cdk.Stack {
     // Sign In Lambda
     // =================================================================
     const signInLambda = new lambda.Function(this, 'SignInHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/signIn.js'),
       handler: 'signIn.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -192,15 +180,13 @@ export class LambdaStack extends cdk.Stack {
     // Password Reset Lambda
     // =================================================================
     const passwordResetLambda = new lambda.Function(this, 'PasswordResetHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/passwordReset.js'),
       handler: 'passwordReset.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...elasticCacheEnv,
         ...cognitoEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -221,14 +207,12 @@ export class LambdaStack extends cdk.Stack {
     // Authenticate User Lambda
     // =================================================================
     const authenticateUserLambda = new lambda.Function(this, 'AuthenticateUserHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/authenticateUser.js'),
       handler: 'authenticateUser.handler',
-      vpc,
       securityGroups: [props.securityGroup],
       environment: {
         ...cognitoEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });
@@ -247,13 +231,11 @@ export class LambdaStack extends cdk.Stack {
     // Send Report Lambda
     // =================================================================
     const sendReportLambda = new lambda.Function(this, 'SendReportHandler', {
-      runtime: nodeVersion.lambaRuntime,
-      code: lambda.Code.fromAsset('dist/lambda'),
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/report.js'),
       handler: 'sendReport.handler',
-      vpc,
       environment: {
         ...elasticCacheEnv,
-        ...sentryEnv,
       },
       layers: [sentryLayer],
     });

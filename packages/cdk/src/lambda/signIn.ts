@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
 import { authenticateUser } from '../utils/cognito';
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const requestBody = JSON.parse(event.body || '{}');
   const { username, password } = requestBody;
   if (!username || !password) {
@@ -23,3 +23,5 @@ export const handler: APIGatewayProxyHandler = async event => {
     refreshToken: RefreshToken,
   });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

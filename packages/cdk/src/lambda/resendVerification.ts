@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
-import { buildEmailParams } from '../utils/sendEmail';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
+import { buildEmailParams } from '../utils/emailService';
 import { RedisClient } from '../utils/redis';
 
 import awsImport from '../../secrets/awsImport.decrypted.json';
@@ -13,7 +13,7 @@ const RESEND_WAIT_TIME = 30; // 30 seconds wait time for resending the code
 // SES Client
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
   if (!email) {
     return errorResponse('Email query parameter is required', 400);
@@ -41,3 +41,5 @@ export const handler: APIGatewayProxyHandler = async event => {
 
   return successResponse({ message: 'Verification code resent successfully' });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

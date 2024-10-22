@@ -1,9 +1,9 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
 import { RedisClient } from '../utils/redis';
 import { generateAuthToken, storeAuthToken } from '../utils/authToken';
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
   const verificationCode = event.queryStringParameters?.verificationCode;
 
@@ -34,3 +34,5 @@ export const handler: APIGatewayProxyHandler = async event => {
     authToken,
   });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

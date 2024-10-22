@@ -1,13 +1,13 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
 import awsImport from '../../secrets/awsImport.decrypted.json';
-import { buildEmailParams } from '../utils/sendEmail';
+import { buildEmailParams } from '../utils/emailService';
 
 // SES Client
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const { contentType, contentId, reportDetails, reporterId } = JSON.parse(event.body || '{}');
 
   if (!contentType || !contentId || !reportDetails || !reporterId) {
@@ -28,3 +28,5 @@ export const handler: APIGatewayProxyHandler = async event => {
 
   return successResponse({ message: 'Report sent successfully' });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

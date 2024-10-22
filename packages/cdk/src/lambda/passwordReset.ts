@@ -1,9 +1,9 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { doesUserExistByEmail, resetUserPassword } from '../utils/cognito';
-import { successResponse, errorResponse } from '../utils/lambdaResponse';
+import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
 import { getAuthToken, deleteAuthToken } from '../utils/authToken';
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
   const authToken = event.queryStringParameters?.authToken;
 
@@ -37,3 +37,5 @@ export const handler: APIGatewayProxyHandler = async event => {
 
   return successResponse({ message: 'Password reset successfully' });
 };
+
+export const handler: APIGatewayProxyHandler = wrapHandler(handlerImplementation);

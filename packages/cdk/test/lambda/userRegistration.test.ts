@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { handler } from '../../src/lambda/userRegistration';
+import { handlerImplementation as handler } from '../../src/lambda/userRegistration';
 import { RedisClient } from '../../src/utils/redis';
 import { createUserInCognito, doesUserExistByEmail } from '../../src/utils/cognito';
-import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
 import { getSchoolKeyByEmail } from '../../src/utils/schoolInfo';
 import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
 
 // Mock the external dependencies
 jest.mock('../../src/utils/redis');
 jest.mock('../../src/utils/cognito');
-jest.mock('../../src/utils/lambdaResponse');
+jest.mock('../../src/utils/handlerUtil');
 jest.mock('../../src/utils/schoolInfo');
 jest.mock('../../src/utils/authToken');
 

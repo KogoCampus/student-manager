@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { handler } from '../../src/lambda/emailVerificationComplete';
+import { handlerImplementation as handler } from '../../src/lambda/emailVerificationComplete';
 import { RedisClient } from '../../src/utils/redis';
-import { successResponse, errorResponse } from '../../src/utils/lambdaResponse';
+import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
 import { generateAuthToken, storeAuthToken } from '../../src/utils/authToken';
 
 // Mock the external dependencies
 jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/lambdaResponse');
+jest.mock('../../src/utils/handlerUtil');
 jest.mock('../../src/utils/authToken');
 
 // Mock context and callback

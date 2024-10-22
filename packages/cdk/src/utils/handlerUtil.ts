@@ -1,3 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as Sentry from '@sentry/aws-serverless';
+
+import awsImport from '../../secrets/awsImport.decrypted.json';
+import { APIGatewayProxyHandler } from 'aws-lambda';
+
+Sentry.init({
+  dsn: awsImport.sentry.dsn,
+  integrations: [Sentry.captureConsoleIntegration()],
+});
+
 // Standard headers for Lambda responses
 const defaultHeaders = {
   'Content-Type': 'application/json',
@@ -27,4 +38,18 @@ export function errorResponse(message: string, statusCode: number = 400, headers
       error: message,
     }),
   };
+}
+
+export function wrapHandler(handler: APIGatewayProxyHandler): any {
+  return Sentry.wrapHandler(async (event: any, context: any, callback: any) => {
+    try {
+      return await handler(event, context, callback);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return errorResponse('Bad request: malformed JSON', 400);
+      } else {
+        throw error;
+      }
+    }
+  });
 }

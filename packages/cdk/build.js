@@ -17,7 +17,7 @@ const commonOptions = {
   platform: 'node',
   target: 'node20',
   external: ['aws-sdk'], // AWS SDK v2 is provided in the Lambda runtime, no need to bundle it
-  sourcemap: true,
+  sourcemap: false,
 };
 
 // =================================================================
@@ -38,7 +38,7 @@ const scanLambdaHandlers = dir => {
     .map(file => path.join(dir, file));
 
   // Print out the handlers in green
-  console.log(color('Found Lambda handlers:', greenText));
+  console.log(color('    Found Lambda handlers:', greenText));
   handlers.forEach(handler => {
     console.log(color(`  ${handler}`, greenText));
   });
