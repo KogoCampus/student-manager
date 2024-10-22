@@ -43,10 +43,12 @@ export class LambdaStack extends cdk.Stack {
     const defaultEnv = {
       NODE_OPTIONS: '--enable-source-maps',
     };
+
     const elasticCacheEnv = {
       REDIS_ENDPOINT: props.redisEndpoint,
       REDIS_PORT: props.redisPort,
     };
+
     const cognitoEnv = {
       COGNITO_USER_POOL_ID: awsImport.cognito.userPoolId,
       COGNITO_CLIENT_ID: awsImport.cognito.clientId,
