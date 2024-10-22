@@ -232,7 +232,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const sendReportLambda = new lambda.Function(this, 'SendReportHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/report'),
+      code: lambda.Code.fromAsset('dist/lambda/sendReport'),
       handler: 'sendReport.handler',
       environment: {
         ...elasticCacheEnv,
