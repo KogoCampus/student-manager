@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
-import { buildEmailParams } from '../utils/emailService';
-import { RedisClient } from '../utils/redis';
+import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
+import { buildEmailParams } from '../lib/emailService';
+import { RedisClient } from '../lib/redis';
 
 import awsImport from '../../secrets/awsImport.decrypted.json';
 

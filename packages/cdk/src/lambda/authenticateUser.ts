@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
-import { getUserDetailsFromAccessToken, refreshAccessToken } from '../utils/cognito';
-import { getSchoolInfoByKey } from '../utils/schoolInfo';
+import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
+import { getUserDetailsFromAccessToken, refreshAccessToken } from '../lib/cognito';
+import { getSchoolDataByEmail } from '../lib/school';
 
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const authorizationHeader = event.headers.Authorization || event.headers.authorization;
@@ -22,28 +22,26 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
   switch (grantType) {
     case 'access_token': {
       const userDetails = await getUserDetailsFromAccessToken(token);
-      const schoolKey = userDetails.schoolKey;
-      const schoolInfo = getSchoolInfoByKey(schoolKey);
+      const schoolData = getSchoolDataByEmail(userDetails.email);
 
       return successResponse({
         userdata: {
           username: userDetails.username,
           email: userDetails.email,
-          schoolInfo: schoolInfo || 'School information not found',
+          schoolData,
         },
       });
     }
     case 'refresh_token': {
       const newAccessToken = await refreshAccessToken(token);
       const userDetails = await getUserDetailsFromAccessToken(newAccessToken); // Fetching user details again for consistency
-      const schoolKey = userDetails.schoolKey;
-      const schoolInfo = getSchoolInfoByKey(schoolKey);
+      const schoolData = getSchoolDataByEmail(userDetails.email);
 
       return successResponse({
         userdata: {
           username: userDetails.username,
           email: userDetails.email,
-          schoolInfo: schoolInfo || 'School information not found',
+          schoolData,
         },
         access_token: newAccessToken,
         message: 'Access token refreshed successfully',

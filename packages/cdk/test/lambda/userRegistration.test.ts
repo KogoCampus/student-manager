@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/userRegistration';
-import { RedisClient } from '../../src/utils/redis';
-import { createUserInCognito, doesUserExistByEmail } from '../../src/utils/cognito';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
-import { getSchoolKeyByEmail } from '../../src/utils/schoolInfo';
-import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
+import { RedisClient } from '../../src/lib/redis';
+import { createUserInCognito, doesUserExistByEmail } from '../../src/lib/cognito';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
+import { getSchoolDataByEmail } from '../../src/lib/school';
+import { getAuthToken, deleteAuthToken } from '../../src/lib/authToken';
 
 // Mock the external dependencies
-jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/cognito');
-jest.mock('../../src/utils/handlerUtil');
-jest.mock('../../src/utils/schoolInfo');
-jest.mock('../../src/utils/authToken');
+jest.mock('../../src/lib/redis');
+jest.mock('../../src/lib/cognito');
+jest.mock('../../src/lib/handlerUtil');
+jest.mock('../../src/lib/school');
+jest.mock('../../src/lib/authToken');
 
 // Mock context and callback
 const mockContext = {} as any;
@@ -27,8 +27,8 @@ describe('userRegistration handler', () => {
     // Mock RedisClient getInstance and its methods
     (RedisClient.getInstance as jest.Mock).mockReturnValue(mockRedisInstance);
 
-    // Mock getSchoolKeyByEmail
-    (getSchoolKeyByEmail as jest.Mock).mockReturnValue('school123');
+    // Mock getSchoolDataByEmail
+    (getSchoolDataByEmail as jest.Mock).mockReturnValue('test@school.edu');
   });
 
   afterEach(() => {
@@ -90,7 +90,7 @@ describe('userRegistration handler', () => {
     const result = await handler(event as any, mockContext, mockCallback);
 
     expect(deleteAuthToken).toHaveBeenCalledWith('test@school.edu');
-    expect(createUserInCognito).toHaveBeenCalledWith('test@school.edu', 'testuser', 'Password123!', 'school123');
+    expect(createUserInCognito).toHaveBeenCalledWith('test@school.edu', 'testuser', 'Password123!');
     expect(successResponse).toHaveBeenCalledWith({
       message: 'User successfully created',
       accessToken: 'access_token',

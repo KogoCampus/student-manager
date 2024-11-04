@@ -56,17 +56,20 @@ const buildLambdaHandlers = () => {
     const handlerName = path.basename(handler, '.ts'); // e.g., emailVerification
     const outDir = path.join('dist', 'lambda', handlerName); // e.g., dist/lambda/emailVerification
 
-    return esbuild.build({
-      entryPoints: [handler],
-      outdir: outDir, // Output to individual directory
-      format: 'cjs',
-      ...commonOptions,
-    }).then(() => {
-      console.log(color(`Lambda build complete for ${handlerName} (${outDir})`, blueText));
-    }).catch(err => {
-      console.error(color(`Build failed for ${handlerName}`, redText));
-      console.error(err);
-    });
+    return esbuild
+      .build({
+        entryPoints: [handler],
+        outdir: outDir, // Output to individual directory
+        format: 'cjs',
+        ...commonOptions,
+      })
+      .then(() => {
+        console.log(color(`Lambda build complete for ${handlerName} (${outDir})`, blueText));
+      })
+      .catch(err => {
+        console.error(color(`Build failed for ${handlerName}`, redText));
+        console.error(err);
+      });
   });
 
   return Promise.all(buildPromises);

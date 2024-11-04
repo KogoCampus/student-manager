@@ -21,13 +21,6 @@ export class LambdaStack extends cdk.Stack {
       vpcId: awsImport.vpc.vpcId,
     });
 
-    const defaultLambdaConfig = {
-      vpc,
-      runtime: lambda.Runtime.NODEJS_20_X, // Runtime configuration
-      memorySize: 512, // Default memory size (MB)
-      timeout: cdk.Duration.seconds(15), // Default timeout (seconds)
-    };
-
     const sentryLayerArn = 'arn:aws:lambda:us-west-2:943013980633:layer:SentryNodeServerlessSDK:281';
     const sentryLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'SentryLayer', sentryLayerArn);
 
@@ -36,6 +29,14 @@ export class LambdaStack extends cdk.Stack {
       rootResourceId: awsImport.apigateway.rootResourceId,
     });
     const studentResource = api.root.addResource('student');
+
+    // Default Config
+    const defaultLambdaConfig = {
+      vpc,
+      runtime: lambda.Runtime.NODEJS_20_X, // Runtime configuration
+      memorySize: 512, // Default memory size (MB)
+      timeout: cdk.Duration.seconds(15), // Default timeout (seconds)
+    };
 
     // =================================================================
     // Environment Variables

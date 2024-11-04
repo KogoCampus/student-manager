@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/passwordReset';
-import { RedisClient } from '../../src/utils/redis';
-import { resetUserPassword, doesUserExistByEmail } from '../../src/utils/cognito';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
-import { getAuthToken, deleteAuthToken } from '../../src/utils/authToken';
+import { RedisClient } from '../../src/lib/redis';
+import { resetUserPassword, doesUserExistByEmail } from '../../src/lib/cognito';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
+import { getAuthToken, deleteAuthToken } from '../../src/lib/authToken';
 
 // Mock external dependencies
-jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/cognito');
-jest.mock('../../src/utils/handlerUtil');
-jest.mock('../../src/utils/authToken');
+jest.mock('../../src/lib/redis');
+jest.mock('../../src/lib/cognito');
+jest.mock('../../src/lib/handlerUtil');
+jest.mock('../../src/lib/authToken');
 
 // Mock context and callback
 const mockContext = {} as any;

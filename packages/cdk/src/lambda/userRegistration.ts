@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, wrapHandler } from '../utils/handlerUtil';
-import { getAuthToken, deleteAuthToken } from '../utils/authToken';
-import { createUserInCognito, doesUserExistByEmail } from '../utils/cognito';
-import { getSchoolKeyByEmail } from '../utils/schoolInfo';
+import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
+import { getAuthToken, deleteAuthToken } from '../lib/authToken';
+import { createUserInCognito, doesUserExistByEmail } from '../lib/cognito';
+import { getSchoolDataByEmail } from '../lib/school';
 
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
@@ -36,8 +36,7 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
   }
 
   // Proceed with user registration in Cognito
-  const schoolKey = getSchoolKeyByEmail(email);
-  const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, username, password, schoolKey);
+  const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, username, password);
 
   // Upon successful registration, delete the auth token from Redis
   await deleteAuthToken(email);

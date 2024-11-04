@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/emailVerificationComplete';
-import { RedisClient } from '../../src/utils/redis';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
-import { generateAuthToken, storeAuthToken } from '../../src/utils/authToken';
+import { RedisClient } from '../../src/lib/redis';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
+import { generateAuthToken, storeAuthToken } from '../../src/lib/authToken';
 
 // Mock the external dependencies
-jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/handlerUtil');
-jest.mock('../../src/utils/authToken');
+jest.mock('../../src/lib/redis');
+jest.mock('../../src/lib/handlerUtil');
+jest.mock('../../src/lib/authToken');
 
 // Mock context and callback
 const mockContext = {} as any;

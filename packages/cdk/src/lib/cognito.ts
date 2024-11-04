@@ -27,12 +27,7 @@ function getCognitoClient(): { cognito: CognitoIdentityProviderClient; clientId:
   return { cognito, clientId, userPoolId };
 }
 
-export async function createUserInCognito(
-  email: string,
-  username: string,
-  password: string,
-  schoolKey: string,
-): Promise<AuthenticationResultType> {
+export async function createUserInCognito(email: string, username: string, password: string): Promise<AuthenticationResultType> {
   const { cognito, clientId, userPoolId } = getCognitoClient();
 
   const createUserCommand = new AdminCreateUserCommand({
@@ -42,7 +37,6 @@ export async function createUserInCognito(
     UserAttributes: [
       { Name: 'email', Value: email },
       { Name: 'email_verified', Value: 'true' },
-      { Name: 'custom:schoolKey', Value: schoolKey },
     ],
   });
 
@@ -100,7 +94,7 @@ export async function authenticateUser(username: string, password: string): Prom
   }
 }
 
-export async function getUserDetailsFromAccessToken(accessToken: string): Promise<{ username: string; email: string; schoolKey: string }> {
+export async function getUserDetailsFromAccessToken(accessToken: string): Promise<{ username: string; email: string }> {
   const { cognito } = getCognitoClient();
 
   const getUserCommand = new GetUserCommand({
@@ -111,12 +105,10 @@ export async function getUserDetailsFromAccessToken(accessToken: string): Promis
 
   if (response && response.Username && response.UserAttributes) {
     const email = response.UserAttributes.find(attr => attr.Name === 'email')?.Value;
-    const schoolKey = response.UserAttributes.find(attr => attr.Name === 'custom:schoolKey')?.Value;
 
     return {
       username: response.Username,
       email: email || '',
-      schoolKey: schoolKey || '',
     };
   } else {
     throw new Error('Failed to retrieve user details');

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/signIn';
-import { authenticateUser } from '../../src/utils/cognito';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
+import { authenticateUser } from '../../src/lib/cognito';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
 
 // Mock the external dependencies
-jest.mock('../../src/utils/cognito');
-jest.mock('../../src/utils/handlerUtil');
+jest.mock('../../src/lib/cognito');
+jest.mock('../../src/lib/handlerUtil');
 
 // Mock context and callback
 const mockContext = {} as any;

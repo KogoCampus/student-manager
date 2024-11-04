@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/authenticateUser';
-import { getUserDetailsFromAccessToken, refreshAccessToken } from '../../src/utils/cognito';
-import { getSchoolInfoByKey } from '../../src/utils/schoolInfo';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
+import { getUserDetailsFromAccessToken, refreshAccessToken } from '../../src/lib/cognito';
+import { getSchoolDataByEmail } from '../../src/lib/school';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
 
 // Mock the external dependencies
-jest.mock('../../src/utils/cognito');
-jest.mock('../../src/utils/schoolInfo');
-jest.mock('../../src/utils/handlerUtil');
+jest.mock('../../src/lib/cognito');
+jest.mock('../../src/lib/school');
+jest.mock('../../src/lib/handlerUtil');
 
 // Mock context and callback
 const mockContext = {} as any;
@@ -39,7 +39,7 @@ describe('authenticateUser handler', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should return user details with schoolInfo when grant_type=access_token', async () => {
+  it('should return user details with schoolData when grant_type=access_token', async () => {
     const event = {
       headers: { Authorization: 'Bearer validAccessToken' },
       queryStringParameters: { grant_type: 'access_token' },
@@ -49,12 +49,11 @@ describe('authenticateUser handler', () => {
     (getUserDetailsFromAccessToken as jest.Mock).mockResolvedValueOnce({
       username: 'testuser',
       email: 'test@school.edu',
-      schoolKey: 'school123',
     });
 
     // Mock successful school info retrieval
-    (getSchoolInfoByKey as jest.Mock).mockReturnValueOnce({
-      domain: 'school.edu',
+    (getSchoolDataByEmail as jest.Mock).mockReturnValueOnce({
+      emailDomains: ['@school.edu'],
       name: 'Test School',
       shortenedName: 'TS',
     });
@@ -62,13 +61,13 @@ describe('authenticateUser handler', () => {
     const result = await handler(event as any, mockContext, mockCallback);
 
     expect(getUserDetailsFromAccessToken).toHaveBeenCalledWith('validAccessToken');
-    expect(getSchoolInfoByKey).toHaveBeenCalledWith('school123');
+    expect(getSchoolDataByEmail).toHaveBeenCalledWith('test@school.edu');
     expect(successResponse).toHaveBeenCalledWith({
       userdata: {
         username: 'testuser',
         email: 'test@school.edu',
-        schoolInfo: {
-          domain: 'school.edu',
+        schoolData: {
+          emailDomains: ['@school.edu'],
           name: 'Test School',
           shortenedName: 'TS',
         },
@@ -90,12 +89,11 @@ describe('authenticateUser handler', () => {
     (getUserDetailsFromAccessToken as jest.Mock).mockResolvedValueOnce({
       username: 'testuser',
       email: 'test@school.edu',
-      schoolKey: 'school123',
     });
 
     // Mock successful school info retrieval
-    (getSchoolInfoByKey as jest.Mock).mockReturnValueOnce({
-      domain: 'school.edu',
+    (getSchoolDataByEmail as jest.Mock).mockReturnValueOnce({
+      emailDomains: ['@school.edu'],
       name: 'Test School',
       shortenedName: 'TS',
     });
@@ -108,8 +106,8 @@ describe('authenticateUser handler', () => {
       userdata: {
         username: 'testuser',
         email: 'test@school.edu',
-        schoolInfo: {
-          domain: 'school.edu',
+        schoolData: {
+          emailDomains: ['@school.edu'],
           name: 'Test School',
           shortenedName: 'TS',
         },

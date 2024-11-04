@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { handlerImplementation as handler } from '../../src/lambda/emailVerification';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { RedisClient } from '../../src/utils/redis';
-import { buildEmailParams } from '../../src/utils/emailService';
-import { successResponse, errorResponse } from '../../src/utils/handlerUtil';
+import { RedisClient } from '../../src/lib/redis';
+import { buildEmailParams } from '../../src/lib/emailService';
+import { successResponse, errorResponse } from '../../src/lib/handlerUtil';
 
 // Mock the external dependencies
 jest.mock('@aws-sdk/client-ses');
-jest.mock('../../src/utils/redis');
-jest.mock('../../src/utils/emailService');
+jest.mock('../../src/lib/redis');
+jest.mock('../../src/lib/emailService');
 // Mock the designatedSchools data to allow specific domains
-jest.mock('../../src/constants/schoolInfo.json', () => ({
-  school1: { domain: '@school.edu', fullName: 'School University', shortenedName: 'School' },
+jest.mock('../../src/constants/schoolListing.json', () => ({
+  school1: { emailDomains: ['@school.edu'], fullName: 'School University', shortenedName: 'School' },
 }));
 
 // Mock context
