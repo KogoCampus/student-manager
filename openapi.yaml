@@ -46,13 +46,14 @@ paths:
                       email:
                         type: string
                         example: johndoe@example.com
-                      schoolInfo:
+                      schoolData:
                         type: object
                         description: School information of the user
                         properties:
-                          domain:
-                            type: string
-                            example: "@sfu.ca"
+                          emailDomains:
+                            type: array
+                            example:
+                              - "@sfu.ca"
                           name:
                             type: string
                             example: Simon Fraser University
