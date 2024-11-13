@@ -11,6 +11,7 @@ interface LambdaStackProps extends cdk.StackProps {
   redisEndpoint: string;
   redisPort: string;
   securityGroup: cdk.aws_ec2.SecurityGroup;
+  pushNotificationQueue: cdk.aws_sqs.Queue;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -264,5 +265,53 @@ export class LambdaStack extends cdk.Stack {
 
     const sendReportIntegration = new apigateway.LambdaIntegration(sendReportLambda);
     studentResource.addResource('send-report').addMethod('POST', sendReportIntegration);
+
+    // =================================================================
+    // Send Report Lambda
+    // =================================================================
+    const updatePushTokenLambda = new lambda.Function(this, 'UpdateTokenHandler', {
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/updatePushToken'),
+      handler: 'updatePushToken.handler',
+      securityGroups: [props.securityGroup],
+      environment: {
+        ...defaultEnv,
+        ...elasticCacheEnv,
+        ...cognitoEnv,
+      },
+      layers: [sentryLayer],
+    });
+
+    const updatePushTokenIntegration = new apigateway.LambdaIntegration(updatePushTokenLambda);
+    studentResource.addResource('push-token').addMethod('PUT', updatePushTokenIntegration);
+
+    // =================================================================
+    // Send Push Notification Lambda
+    // =================================================================
+    const sendPushNotificationLambda = new lambda.Function(this, 'SendPushNotificationHandler', {
+      ...defaultLambdaConfig,
+      code: lambda.Code.fromAsset('dist/lambda/internal/sendPushNotification'),
+      handler: 'sendPushNotification.handler',
+      securityGroups: [props.securityGroup],
+      environment: {
+        ...defaultEnv,
+        ...elasticCacheEnv,
+        ...cognitoEnv,
+        PUSH_NOTIFICATION_QUEUE_URL: props.pushNotificationQueue.queueUrl,
+      },
+      layers: [sentryLayer],
+    });
+
+    // Add IAM policy to allow Lambda to send messages to SQS
+    sendPushNotificationLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['sqs:SendMessage'],
+        resources: [props.pushNotificationQueue.queueArn],
+      }),
+    );
+
+    const sendPushNotificationIntegration = new apigateway.LambdaIntegration(sendPushNotificationLambda);
+    studentResource.addResource('internal').addResource('push-notification').addMethod('POST', sendPushNotificationIntegration);
+
   }
 }

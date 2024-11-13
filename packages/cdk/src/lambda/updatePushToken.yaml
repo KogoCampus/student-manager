@@ -1,0 +1,47 @@
+serverless:
+  Resources:
+    UpdatePushTokenFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/updatePushToken/updatePushToken.handlerImplementation
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+            COGNITO_USER_POOL_ID:
+            COGNITO_CLIENT_ID:
+        Events:
+          UpdatePushTokenApi:
+            Type: Api
+            Properties:
+              Path: /student/push-token
+              Method: put
+
+openapi:
+  paths:
+    /student/pushToken:
+      put:
+        summary: Update the push token for a device
+        description: Updates the push token for a device to enable push notifications.
+        parameters:
+          - name: Authorization
+            in: header
+            required: true
+            description: Bearer token (access token or refresh token) for authentication.
+            schema:
+              type: string
+          - name: push_token
+            in: query
+            required: true
+            description: The updated push token for the device.
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Push token updated successfully
+          '400':
+            description: Bad request - missing or invalid parameters
+          '500':
+            description: Internal server error

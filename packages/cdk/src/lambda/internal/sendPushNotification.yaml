@@ -1,0 +1,59 @@
+serverless:
+  Resources:
+    SendPushNotificationFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: lambda/sendPushNotification/sendPushNotification.handlerImplementation
+        Runtime: nodejs20.x
+        CodeUri: .
+        Environment:
+          Variables:
+            REDIS_ENDPOINT:
+            REDIS_PORT:
+            COGNITO_USER_POOL_ID:
+            COGNITO_CLIENT_ID:
+            PUSH_NOTIFICATION_QUEUE_URL:
+        Policies:
+          - SQSSendMessagePolicy:
+              QueueName: !GetAtt PushNotificationQueue.QueueName
+        Events:
+          SendPushNotificationApi:
+            Type: Api
+            Properties:
+              Path: /student/internal/push-notification
+              Method: post
+
+    PushNotificationQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: push-notification-queue
+        VisibilityTimeout: 300
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt PushNotificationDLQ.Arn
+          maxReceiveCount: 3
+
+    PushNotificationDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: push-notification-dlq
+
+openapi:
+  paths:
+    /student/internal/push-notification:
+      post:
+        summary: Send a push notification to a device
+        description: Sends a push notification to a device using the push token.
+        parameters:
+          - name: Authorization
+            in: header
+            required: true
+            description: Bearer token (access token or refresh token) for authentication.
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Push notification sent successfully
+          '400':
+            description: Bad request - missing or invalid parameters
+          '500':
+            description: Internal server error
