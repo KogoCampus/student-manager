@@ -12,30 +12,12 @@ serverless:
             REDIS_PORT:
             COGNITO_USER_POOL_ID:
             COGNITO_CLIENT_ID:
-            PUSH_NOTIFICATION_QUEUE_URL:
-        Policies:
-          - SQSSendMessagePolicy:
-              QueueName: !GetAtt PushNotificationQueue.QueueName
         Events:
           SendPushNotificationApi:
             Type: Api
             Properties:
               Path: /student/internal/push-notification
               Method: post
-
-    PushNotificationQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: push-notification-queue
-        VisibilityTimeout: 300
-        RedrivePolicy:
-          deadLetterTargetArn: !GetAtt PushNotificationDLQ.Arn
-          maxReceiveCount: 3
-
-    PushNotificationDLQ:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: push-notification-dlq
 
 openapi:
   paths:

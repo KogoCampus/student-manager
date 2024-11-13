@@ -297,21 +297,11 @@ export class LambdaStack extends cdk.Stack {
         ...defaultEnv,
         ...elasticCacheEnv,
         ...cognitoEnv,
-        PUSH_NOTIFICATION_QUEUE_URL: props.pushNotificationQueue.queueUrl,
       },
       layers: [sentryLayer],
     });
 
-    // Add IAM policy to allow Lambda to send messages to SQS
-    sendPushNotificationLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ['sqs:SendMessage'],
-        resources: [props.pushNotificationQueue.queueArn],
-      }),
-    );
-
     const sendPushNotificationIntegration = new apigateway.LambdaIntegration(sendPushNotificationLambda);
     studentResource.addResource('internal').addResource('push-notification').addMethod('POST', sendPushNotificationIntegration);
-
   }
 }

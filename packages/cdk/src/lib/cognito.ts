@@ -115,6 +115,20 @@ export async function getUserDetailsFromAccessToken(accessToken: string): Promis
   }
 }
 
+export async function getUserDetailsFromIdToken(idToken: string): Promise<{ username: string; email: string }> {
+  try {
+    // ID tokens are JWTs, so we can decode them directly
+    const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
+
+    return {
+      username: payload['cognito:username'] || payload.sub,
+      email: payload.email || '',
+    };
+  } catch (error) {
+    throw new Error(`Failed to decode ID token: ${error}`);
+  }
+}
+
 export async function refreshAccessToken(refreshToken: string): Promise<string> {
   const { cognito, clientId, userPoolId } = getCognitoClient();
 
