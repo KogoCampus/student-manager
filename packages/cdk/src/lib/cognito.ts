@@ -115,17 +115,21 @@ export async function getUserDetailsFromAccessToken(accessToken: string): Promis
   }
 }
 
-export async function getUserDetailsFromIdToken(idToken: string): Promise<{ username: string; email: string }> {
+export async function decodeIdToken(idToken: string): Promise<{ username: string; email: string }> {
   try {
-    // ID tokens are JWTs, so we can decode them directly
-    const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
+    // Decode the Base64 string
+    const decodedString = Buffer.from(idToken, 'base64').toString('utf-8');
 
-    return {
-      username: payload['cognito:username'] || payload.sub,
-      email: payload.email || '',
-    };
+    // Split the decoded string into username and email
+    const [username, email] = decodedString.split(':');
+
+    if (!username || !email) {
+      throw new Error('Invalid token format. Expected "username:email".');
+    }
+
+    return { username, email };
   } catch (error) {
-    throw new Error(`Failed to decode ID token: ${error}`);
+    throw new Error(`Failed to decode ID token: ${error.message}`);
   }
 }
 

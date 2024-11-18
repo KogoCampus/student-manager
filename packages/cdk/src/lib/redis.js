@@ -125,6 +125,27 @@ var RedisClient = /** @class */ (function () {
             });
         });
     };
+    //used for healthcheck
+    RedisClient.prototype.ping = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.client.ping()];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result === 'PONG'];
+                    case 2:
+                        error_1 = _a.sent();
+                        console.error('Redis ping failed:', error_1);
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
     RedisClient.instance = null;
     return RedisClient;
 }());

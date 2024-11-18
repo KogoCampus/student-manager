@@ -23045,6 +23045,16 @@ var RedisClient = class _RedisClient {
     }
     return [result.key, result.element];
   }
+  //used for healthcheck
+  async ping() {
+    try {
+      const result = await this.client.ping();
+      return result === "PONG";
+    } catch (error) {
+      console.error("Redis ping failed:", error);
+      return false;
+    }
+  }
 };
 
 // ../../node_modules/.pnpm/node-fetch@3.3.2/node_modules/node-fetch/src/index.js
@@ -24335,7 +24345,11 @@ var EXPO_PUSH_API = "https://exp.host/--/api/v2/push/send";
 var handlerImplementation = async () => {
   console.log("Starting push notification processing...");
   try {
-    const message = await redis2.blpop(PUSH_NOTIFICATION_QUEUE, 20);
+    const isConnected = await redis2.ping();
+    if (!isConnected) {
+      throw new Error("Redis connection failed");
+    }
+    const message = await redis2.blpop(PUSH_NOTIFICATION_QUEUE, 10);
     if (!message) {
       console.log("No messages in queue");
       return {
@@ -24354,14 +24368,42 @@ var handlerImplementation = async () => {
     }
     for (const [index, tokenChunk] of tokenChunks.entries()) {
       console.log(`Processing chunk ${index + 1}/${tokenChunks.length} (${tokenChunk.length} tokens)`);
-      const messages = tokenChunk.map((token) => ({
-        to: token,
-        title: pushNotification.notification.title,
-        body: pushNotification.notification.body,
-        data: pushNotification.notification.data || {},
-        sound: "default",
-        priority: "high"
-      }));
+      const messages = tokenChunk.map((token) => {
+        const isAndroid = token.includes("ExponentPushToken");
+        const baseMessage = {
+          to: token,
+          title: pushNotification.notification.title,
+          body: pushNotification.notification.body,
+          data: pushNotification.notification.data || {},
+          sound: "default",
+          priority: "high"
+        };
+        if (isAndroid) {
+          return {
+            ...baseMessage,
+            channelId: "default",
+            android: {
+              sound: "default",
+              priority: "max",
+              channelId: "default",
+              vibrate: [0, 250, 250, 250],
+              sticky: true,
+              icon: "ic_launcher",
+              color: "#000000"
+            }
+          };
+        } else {
+          return {
+            ...baseMessage,
+            _displayInForeground: true,
+            ios: {
+              sound: true,
+              _displayInForeground: true,
+              shouldSendToNotificationCenter: true
+            }
+          };
+        }
+      });
       try {
         console.log("Sending messages to Expo:", JSON.stringify(messages));
         const response = await fetch(EXPO_PUSH_API, {
@@ -24385,15 +24427,32 @@ var handlerImplementation = async () => {
           continue;
         }
         tickets.forEach((ticket, i2) => {
+          const isAndroid = tokenChunk[i2].includes("ExponentPushToken");
+          const platform = isAndroid ? "Android" : "iOS";
+          console.log(`Processing notification for ${platform}:`, {
+            token: tokenChunk[i2],
+            message: messages[i2],
+            ticket
+          });
           if (ticket.status === "ok") {
-            console.log(`Successfully sent notification to token: ${tokenChunk[i2]}, ticket ID: ${ticket.id}`);
+            console.log(`Successfully sent notification to ${platform} token: ${tokenChunk[i2]}, ticket ID: ${ticket.id}`);
           } else {
-            console.error(`Failed to send notification to token: ${tokenChunk[i2]}`, {
+            console.error(`Failed to send notification to ${platform} token: ${tokenChunk[i2]}`, {
               error: ticket.message,
-              details: ticket.details
+              details: ticket.details,
+              platform,
+              messageConfig: messages[i2]
             });
           }
         });
+        console.log(
+          "Full Expo API response:",
+          JSON.stringify({
+            data: responseData,
+            requestBody: messages,
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          })
+        );
       } catch (error) {
         console.error("Error sending push notifications batch:", error);
       }

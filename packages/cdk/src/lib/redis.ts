@@ -55,6 +55,17 @@ class RedisClient {
     }
     return [result.key, result.element];
   }
+
+  //used for healthcheck
+  public async ping(): Promise<boolean> {
+    try {
+      const result = await this.client.ping(); // Use ping() instead of call('ping')
+      return result === 'PONG';
+    } catch (error) {
+      console.error('Redis ping failed:', error);
+      return false;
+    }
+  }
 }
 
 export { RedisClient };

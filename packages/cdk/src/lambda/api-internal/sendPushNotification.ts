@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
-import { getUserDetailsFromIdToken } from '../../lib/cognito';
+import { decodeIdToken } from '../../lib/cognito';
 import { RedisClient } from '../../lib/redis';
 
 const redis = RedisClient.getInstance();
@@ -44,7 +44,7 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
     const usernames = await Promise.all(
       payload.recipients.map(async token => {
         try {
-          const userDetails = await getUserDetailsFromIdToken(token);
+          const userDetails = await decodeIdToken(token);
           return userDetails.username;
         } catch (error) {
           console.error('Error getting user details:', error);

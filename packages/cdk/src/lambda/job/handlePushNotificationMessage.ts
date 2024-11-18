@@ -22,6 +22,8 @@ interface ExpoMessage {
   data?: Record<string, unknown>;
   sound: 'default';
   priority: 'high';
+  channelId?: string;
+  _displayInForeground?: boolean;
 }
 
 interface ExpoTicket {
@@ -37,8 +39,14 @@ export const handlerImplementation: Handler = async () => {
   console.log('Starting push notification processing...');
 
   try {
-    // Get message from queue (with 20-second timeout)
-    const message = await redis.blpop(PUSH_NOTIFICATION_QUEUE, 20);
+    // Test Redis connection
+    const isConnected = await redis.ping();
+    if (!isConnected) {
+      throw new Error('Redis connection failed');
+    }
+
+    // Get message from queue (with 10-second timeout)
+    const message = await redis.blpop(PUSH_NOTIFICATION_QUEUE, 10);
 
     if (!message) {
       console.log('No messages in queue');
@@ -65,14 +73,45 @@ export const handlerImplementation: Handler = async () => {
     for (const [index, tokenChunk] of tokenChunks.entries()) {
       console.log(`Processing chunk ${index + 1}/${tokenChunks.length} (${tokenChunk.length} tokens)`);
 
-      const messages: ExpoMessage[] = tokenChunk.map(token => ({
-        to: token,
-        title: pushNotification.notification.title,
-        body: pushNotification.notification.body,
-        data: pushNotification.notification.data || {},
-        sound: 'default',
-        priority: 'high',
-      }));
+      const messages: ExpoMessage[] = tokenChunk.map(token => {
+        const isAndroid = token.includes('ExponentPushToken');
+
+        const baseMessage = {
+          to: token,
+          title: pushNotification.notification.title,
+          body: pushNotification.notification.body,
+          data: pushNotification.notification.data || {},
+          sound: 'default',
+          priority: 'high',
+        };
+
+        if (isAndroid) {
+          return {
+            ...baseMessage,
+            channelId: 'default',
+            android: {
+              sound: 'default',
+              priority: 'max',
+              channelId: 'default',
+              vibrate: [0, 250, 250, 250],
+              sticky: true,
+              icon: 'ic_launcher',
+              color: '#000000',
+            },
+          };
+        } else {
+          // iOS specific configuration
+          return {
+            ...baseMessage,
+            _displayInForeground: true,
+            ios: {
+              sound: true,
+              _displayInForeground: true,
+              shouldSendToNotificationCenter: true,
+            },
+          };
+        }
+      });
 
       try {
         console.log('Sending messages to Expo:', JSON.stringify(messages));
@@ -105,15 +144,36 @@ export const handlerImplementation: Handler = async () => {
 
         // Process and log results
         tickets.forEach((ticket, i) => {
+          const isAndroid = tokenChunk[i].includes('ExponentPushToken');
+          const platform = isAndroid ? 'Android' : 'iOS';
+
+          console.log(`Processing notification for ${platform}:`, {
+            token: tokenChunk[i],
+            message: messages[i],
+            ticket,
+          });
+
           if (ticket.status === 'ok') {
-            console.log(`Successfully sent notification to token: ${tokenChunk[i]}, ticket ID: ${ticket.id}`);
+            console.log(`Successfully sent notification to ${platform} token: ${tokenChunk[i]}, ticket ID: ${ticket.id}`);
           } else {
-            console.error(`Failed to send notification to token: ${tokenChunk[i]}`, {
+            console.error(`Failed to send notification to ${platform} token: ${tokenChunk[i]}`, {
               error: ticket.message,
               details: ticket.details,
+              platform,
+              messageConfig: messages[i],
             });
           }
         });
+
+        // Add response data logging
+        console.log(
+          'Full Expo API response:',
+          JSON.stringify({
+            data: responseData,
+            requestBody: messages,
+            timestamp: new Date().toISOString(),
+          }),
+        );
       } catch (error) {
         console.error('Error sending push notifications batch:', error);
         // Continue with next chunk even if this one failed
