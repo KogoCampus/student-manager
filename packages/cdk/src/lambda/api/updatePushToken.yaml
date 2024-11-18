@@ -3,7 +3,7 @@ serverless:
     UpdatePushTokenFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/updatePushToken/updatePushToken.handlerImplementation
+        Handler: lambda/api/updatePushToken.handlerImplementation
         Runtime: nodejs20.x
         CodeUri: .
         Environment:

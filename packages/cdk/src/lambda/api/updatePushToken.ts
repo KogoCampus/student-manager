@@ -1,14 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import { getUserDetailsFromAccessToken } from '../lib/cognito';
-import Redis from 'ioredis';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import { getUserDetailsFromAccessToken } from '../../lib/cognito';
+import { RedisClient } from '../../lib/redis';
 
-// Initialize Redis client
-const redis = new Redis({
-  host: process.env.REDIS_ENDPOINT,
-  port: Number(process.env.REDIS_PORT),
-});
-
+// Initialize Redis client instance
+const redisClient = RedisClient.getInstance();
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const authorizationHeader = event.headers.Authorization || event.headers.authorization;
 
@@ -44,11 +40,10 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
   // Save the push token in Redis with the user's unique identifier
   try {
     // Store the push token for the user in Redis
-    console.log(`Updating push token for user: ${userName}`);
-    console.log(`Push token: ${pushToken}`);
     const redisKey = `push_token:${userName}`; // Store the push token for the user
-    await redis.set(redisKey, pushToken);
-    console.log(await redis.get(redisKey));
+    await redisClient.setWithExpiry(redisKey, pushToken, 24 * 60 * 60); // Set with a 24-hour expiry (optional)
+
+    console.log(await redisClient.get(redisKey));
 
     return successResponse({ message: 'Push token updated successfully for user' });
   } catch (error) {

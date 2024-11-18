@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import { getUserDetailsFromAccessToken, refreshAccessToken } from '../lib/cognito';
-import { getSchoolDataByEmail } from '../lib/school';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import { getUserDetailsFromAccessToken, refreshAccessToken } from '../../lib/cognito';
+import { getSchoolDataByEmail } from '../../lib/school';
 
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const authorizationHeader = event.headers.Authorization || event.headers.authorization;

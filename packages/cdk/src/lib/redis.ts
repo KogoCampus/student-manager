@@ -43,6 +43,18 @@ class RedisClient {
   async delete(key: string): Promise<void> {
     await this.client.del(key);
   }
+
+  async lpush(key: string, value: string): Promise<void> {
+    await this.client.lPush(key, value); // Use lPush for the lpush command
+  }
+
+  async blpop(key: string, timeout: number): Promise<[string, string] | null> {
+    const result = await this.client.blPop(key, timeout);
+    if (!result) {
+      return null;
+    }
+    return [result.key, result.element];
+  }
 }
 
 export { RedisClient };

@@ -1,10 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import { buildEmailParams } from '../lib/emailService';
-import { RedisClient } from '../lib/redis';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import { buildEmailParams } from '../../lib/emailService';
+import { RedisClient } from '../../lib/redis';
 
-import awsImport from '../../secrets/awsImport.decrypted.json';
+import awsImport from '../../../secrets/awsImport.decrypted.json';
 
 // Constants
 const EXPIRATION_TIME = 900; // 15 minutes for the verification code expiry

@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import { authenticateUser } from '../lib/cognito';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import { authenticateUser } from '../../lib/cognito';
 
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const requestBody = JSON.parse(event.body || '{}');

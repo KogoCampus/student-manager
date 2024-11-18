@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import awsImport from '../../secrets/awsImport.decrypted.json';
-import { buildEmailParams } from '../lib/emailService';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import awsImport from '../../../secrets/awsImport.decrypted.json';
+import { buildEmailParams } from '../../lib/emailService';
 
 // SES Client
 const SES = new SESClient({ region: awsImport.ses.sesIdentityRegion });

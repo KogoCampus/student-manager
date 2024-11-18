@@ -3,7 +3,7 @@ serverless:
     SendPushNotificationFunction:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: lambda/sendPushNotification/sendPushNotification.handlerImplementation
+        Handler: lambda/api-internal/sendPushNotification.handlerImplementation
         Runtime: nodejs20.x
         CodeUri: .
         Environment:
@@ -32,6 +32,34 @@ openapi:
             description: Bearer token (access token or refresh token) for authentication.
             schema:
               type: string
+        requestBody:
+          description: The push notification payload.
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipients:
+                    type: array
+                    description: The recipients to get notifications.
+                    items:
+                      type: string
+                      description: An ID token for a recipient.
+                  notification:
+                    type: object
+                    description: The notification data.
+                    properties:
+                      title:
+                        type: string
+                        description: The title of the notification.
+                      body:
+                        type: string
+                        description: The body of the notification.
+                      data:
+                        type: object
+                        required: false
+                        description: The data to send with the notification.
         responses:
           '200':
             description: Push notification sent successfully

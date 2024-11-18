@@ -31,11 +31,21 @@ const cdkBuild = {
 
 // =================================================================
 // Lambda Build Options (src/lambda -> dist/lambda)
+// Recursively scan for .ts files in subfolders
 const scanLambdaHandlers = dir => {
-  const handlers = fs
-    .readdirSync(dir)
-    .filter(file => file.endsWith('.ts'))
-    .map(file => path.join(dir, file));
+  const handlers = [];
+  const files = fs.readdirSync(dir);
+
+  files.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      handlers.push(...scanLambdaHandlers(filePath)); // Recursively add handlers from subdirectories
+    } else if (file.endsWith('.ts')) {
+      handlers.push(filePath);
+    }
+  });
 
   // Print out the handlers in green
   console.log(color('Found Lambda handlers:', blueText));
@@ -46,20 +56,24 @@ const scanLambdaHandlers = dir => {
   return handlers;
 };
 
+// =================================================================
+// Lambda Handlers
 const lambdaDir = path.join(__dirname, 'src', 'lambda');
 const lambdaHandlers = scanLambdaHandlers(lambdaDir);
 
 // =================================================================
-// Dynamic build for each Lambda handler to its own directory
+// Build Lambda Handlers
 const buildLambdaHandlers = () => {
   const buildPromises = lambdaHandlers.map(handler => {
+    const relativePath = path.relative(lambdaDir, handler);
     const handlerName = path.basename(handler, '.ts'); // e.g., emailVerification
-    const outDir = path.join('dist', 'lambda', handlerName); // e.g., dist/lambda/emailVerification
+    const subfolder = path.dirname(relativePath); // Preserve subfolder structure
+    const outDir = path.join('dist', 'lambda', subfolder); // e.g., dist/lambda/api/emailVerification
 
     return esbuild
       .build({
         entryPoints: [handler],
-        outdir: outDir, // Output to individual directory
+        outdir: outDir,
         format: 'cjs',
         ...commonOptions,
       })
@@ -80,6 +94,25 @@ const buildLambdaHandlers = () => {
 const distDir = path.join(__dirname, 'dist');
 const distOpenApi = path.join(distDir, 'openapi.yaml');
 
+// Recursively scan for .yaml files in subfolders
+const scanYamlFiles = dir => {
+  const yamlFiles = [];
+  const files = fs.readdirSync(dir);
+
+  files.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      yamlFiles.push(...scanYamlFiles(filePath)); // Recursively add YAML files from subdirectories
+    } else if (file.endsWith('.yaml')) {
+      yamlFiles.push(filePath);
+    }
+  });
+
+  return yamlFiles;
+};
+
 const assembleOpenApiDocs = () => {
   const openApiTemplate = {
     openapi: '3.0.0',
@@ -97,12 +130,11 @@ const assembleOpenApiDocs = () => {
     paths: {},
   };
 
-  // Merge all the path definitions into the main OpenAPI object
-  const apiFiles = fs.readdirSync(lambdaDir).filter(file => file.endsWith('.yaml'));
-  apiFiles.forEach(file => {
-    const filePath = path.join(lambdaDir, file);
-    const apiYamlContent = fs.readFileSync(filePath, 'utf8');
+  const yamlFiles = scanYamlFiles(lambdaDir);
+  yamlFiles.forEach(file => {
+    const apiYamlContent = fs.readFileSync(file, 'utf8');
     const apiDoc = YAML.parse(apiYamlContent);
+
     // Merge OpenAPI docs
     if (apiDoc.openapi && apiDoc.openapi.paths) {
       Object.assign(openApiTemplate.paths, apiDoc.openapi.paths);
@@ -125,15 +157,13 @@ const commonSamTemplatePath = path.join(__dirname, 'serverless.yaml');
 const assembleSamTemplate = () => {
   const commonSamTemplate = YAML.parse(fs.readFileSync(commonSamTemplatePath, 'utf8'));
 
-  const apiFiles = fs.readdirSync(lambdaDir).filter(file => file.endsWith('.yaml'));
-  apiFiles.forEach(file => {
-    const filePath = path.join(lambdaDir, file);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
+  const yamlFiles = scanYamlFiles(lambdaDir);
+  yamlFiles.forEach(file => {
+    const fileContent = fs.readFileSync(file, 'utf8');
     const fileDoc = YAML.parse(fileContent);
 
     // Merge SAM docs
     if (fileDoc.serverless && fileDoc.serverless.Resources) {
-      // Here we are merging only the 'Resources' part of the file
       Object.assign(commonSamTemplate.Resources, fileDoc.serverless.Resources);
       console.log(color(`  Merged ${file} into SAM template`, greenText));
     }

@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { doesUserExistByEmail, resetUserPassword } from '../lib/cognito';
-import { successResponse, errorResponse, wrapHandler } from '../lib/handlerUtil';
-import { getAuthToken, deleteAuthToken } from '../lib/authToken';
+import { doesUserExistByEmail, resetUserPassword } from '../../lib/cognito';
+import { successResponse, errorResponse, wrapHandler } from '../../lib/handlerUtil';
+import { getAuthToken, deleteAuthToken } from '../../lib/authToken';
 
 export const handlerImplementation: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;

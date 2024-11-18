@@ -4,6 +4,16 @@ import { getUserDetailsFromIdToken } from '../../lib/cognito';
 import { RedisClient } from '../../lib/redis';
 
 const redis = RedisClient.getInstance();
+const PUSH_NOTIFICATION_QUEUE = 'push_notification_queue';
+
+interface PushNotificationMessage {
+  pushTokens: string[];
+  notification: {
+    title: string;
+    body: string;
+    data?: Record<string, unknown>;
+  };
+}
 
 interface PushNotificationPayload {
   recipients: string[]; // Array of Cognito ID tokens
@@ -46,6 +56,8 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
     // Filter out failed token conversions
     const validUsernames = usernames.filter((username): username is string => username !== null);
 
+    console.log('Valid usernames:', validUsernames);
+
     // Get push tokens from Redis
     const pushTokens = await Promise.all(
       validUsernames.map(async username => {
@@ -56,10 +68,22 @@ export const handlerImplementation: APIGatewayProxyHandler = async event => {
 
     // Filter out users without push tokens
     const validPushTokens = pushTokens.filter((token): token is { username: string; pushToken: string } => token !== null);
+    console.log('validPushTokens:', validPushTokens);
 
     if (validPushTokens.length === 0) {
       return errorResponse('No valid push tokens found for the provided recipients', 400);
     }
+
+    // Queue the push notification
+    const message: PushNotificationMessage = {
+      pushTokens: validPushTokens.map(token => token.pushToken),
+      notification: payload.notification,
+    };
+
+    console.log('message:', message);
+
+    // Add to Redis queue
+    await redis.lpush(PUSH_NOTIFICATION_QUEUE, JSON.stringify(message));
 
     return successResponse({
       message: 'Push notification queued successfully',

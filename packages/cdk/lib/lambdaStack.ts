@@ -11,7 +11,6 @@ interface LambdaStackProps extends cdk.StackProps {
   redisEndpoint: string;
   redisPort: string;
   securityGroup: cdk.aws_ec2.SecurityGroup;
-  pushNotificationQueue: cdk.aws_sqs.Queue;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -290,7 +289,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const sendPushNotificationLambda = new lambda.Function(this, 'SendPushNotificationHandler', {
       ...defaultLambdaConfig,
-      code: lambda.Code.fromAsset('dist/lambda/internal/sendPushNotification'),
+      code: lambda.Code.fromAsset('dist/lambda/api-internal/sendPushNotification'),
       handler: 'sendPushNotification.handler',
       securityGroups: [props.securityGroup],
       environment: {

@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    MemorySize: 512
+    Timeout: 30
+Resources:
+  HandlePushNotificationMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlePushNotificationMessage.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Environment:
+        Variables:
+          REDIS_ENDPOINT: host.docker.internal
+          REDIS_PORT: 63790
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(10 seconds)
