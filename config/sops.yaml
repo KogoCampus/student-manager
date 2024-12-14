@@ -1,0 +1,5 @@
+creation_rules:
+  - path_regex: settings\.staging\.json
+    kms: arn:aws:kms:us-west-2:992382730467:key/83b58309-e6f9-42c9-bd36-c02f2ea894ab
+  - path_regex: settings\.production\.json
+    kms: arn:aws:kms:us-west-2:992382730467:key/bdf54be4-8c74-424d-8b2e-d0e0c5e01c38

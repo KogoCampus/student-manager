@@ -1,0 +1,19 @@
+paths:
+  /student/verify-email:
+    post:
+      summary: Verify a student's email
+      description: Generates a verification code and sends it to the email provided.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address of the student to verify.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Verification email sent
+        '400':
+          description: Bad request - missing or invalid parameters
+        '500':
+          description: Internal server error

@@ -1,0 +1,101 @@
+paths:
+  /student/authenticate:
+    get:
+      summary: Authenticate user with either access_token or refresh_token
+      description: Authenticate a user using an access token or refresh the access token using a refresh token.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token (access token or refresh token) for authentication.
+          schema:
+            type: string
+        - name: grant_type
+          in: query
+          required: true
+          description: The grant type, either access_token or refresh_token.
+          schema:
+            type: string
+            enum: [access_token, refresh_token]
+      responses:
+        '200':
+          description: User authenticated successfully or access token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userdata:
+                    type: object
+                    required:
+                      - username
+                      - email
+                      - schoolKey
+                      - schoolData
+                    properties:
+                      username:
+                        type: string
+                        example: "johndoe"
+                      email:
+                        type: string
+                        example: "johndoe@sfu.ca"
+                      schoolKey:
+                        type: string
+                        example: "simon_fraser_university"
+                        description: Unique identifier for the school
+                      schoolData:
+                        type: object
+                        required:
+                          - emailDomains
+                          - name
+                          - shortenedName
+                        properties:
+                          emailDomains:
+                            type: array
+                            items:
+                              type: string
+                            example: ["@sfu.ca"]
+                          name:
+                            type: string
+                            example: "Simon Fraser University"
+                          shortenedName:
+                            type: string
+                            example: "SFU"
+                  access_token:
+                    type: string
+                    description: New access token (only present when grant_type is refresh_token)
+                    example: "eyJhbGciOiJIUzI1NiIsInR5..."
+                  message:
+                    type: string
+                    description: Success message (only present when grant_type is refresh_token)
+                    example: "Access token refreshed successfully"
+        '400':
+          description: Bad request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Authorization header is missing"
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token is invalid or has expired"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"

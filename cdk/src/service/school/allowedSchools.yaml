@@ -1,0 +1,269 @@
+british_columbia_institute_of_technology:
+  emailDomains:
+    - "@bcit.ca"
+  name: "British Columbia Institute of Technology"
+  shortenedName: "BCIT"
+
+camosun_college:
+  emailDomains:
+    - "@camosun.ca"
+  name: "Camosun College"
+  shortenedName: "CC"
+
+capilano_university:
+  emailDomains:
+    - "@capilanou.ca"
+  name: "Capilano University"
+  shortenedName: "CapU"
+
+coast_mountain_college:
+  emailDomains:
+    - "@coastmountaincollege.ca"
+  name: "Coast Mountain College"
+  shortenedName: "CMTN"
+
+college_of_new_caledonia:
+  emailDomains:
+    - "@cnc.bc.ca"
+  name: "College of New Caledonia"
+  shortenedName: "CNC"
+
+college_of_the_rockies:
+  emailDomains:
+    - "@cotr.bc.ca"
+  name: "College of the Rockies"
+  shortenedName: "COTR"
+
+douglas_college:
+  emailDomains:
+    - "@douglascollege.ca"
+  name: "Douglas College"
+  shortenedName: "DC"
+
+emily_carr_university_of_art_and_design:
+  emailDomains:
+    - "@ecuad.ca"
+  name: "Emily Carr University of Art and Design"
+  shortenedName: "ECU"
+
+justice_institute_of_british_columbia:
+  emailDomains:
+    - "@jibc.ca"
+  name: "Justice Institute of British Columbia"
+  shortenedName: "JIBC"
+
+kwantlen_polytechnic_university:
+  emailDomains:
+    - "@kPU.ca"
+  name: "Kwantlen Polytechnic University"
+  shortenedName: "KPU"
+
+langara_college:
+  emailDomains:
+    - "@langara.ca"
+  name: "Langara College"
+  shortenedName: "LC"
+
+nicola_valley_institute_of_technology:
+  emailDomains:
+    - "@nvit.ca"
+  name: "Nicola Valley Institute of Technology"
+  shortenedName: "NVIT"
+
+north_island_college:
+  emailDomains:
+    - "@nic.bc.ca"
+  name: "North Island College"
+  shortenedName: "NIC"
+
+northern_lights_college:
+  emailDomains:
+    - "@nlc.bc.ca"
+  name: "Northern Lights College"
+  shortenedName: "NLC"
+
+okanagan_college:
+  emailDomains:
+    - "@okanagan.bc.ca"
+  name: "Okanagan College"
+  shortenedName: "OC"
+
+royal_roads_university:
+  emailDomains:
+    - "@royalroads.ca"
+  name: "Royal Roads University"
+  shortenedName: "RRU"
+
+selkirk_college:
+  emailDomains:
+    - "@selkirk.ca"
+  name: "Selkirk College"
+  shortenedName: "SU"
+
+simon_fraser_university:
+  emailDomains:
+    - "@sfu.ca"
+  name: "Simon Fraser University"
+  shortenedName: "SFU"
+
+thompson_rivers_university:
+  emailDomains:
+    - "@tru.ca"
+  name: "Thompson Rivers University"
+  shortenedName: "TRU"
+
+university_of_british_columbia:
+  emailDomains:
+    - "@ubc.ca"
+  name: "University of British Columbia"
+  shortenedName: "UBC"
+
+university_of_northern_british_columbia:
+  emailDomains:
+    - "@unbc.ca"
+  name: "University of Northern British Columbia"
+  shortenedName: "UNBC"
+
+unversity_of_the_fraservalley:
+  emailDomains:
+    - "@ufv.ca"
+  name: "University of the Fraser Valley"
+  shortenedName: "UFV"
+
+university_of_victoria:
+  emailDomains:
+    - "@uvic.ca"
+  name: "University of Victoria"
+  shortenedName: "UVic"
+
+vancouver_community_college:
+  emailDomains:
+    - "@vcc.ca"
+  name: "Vancouver Community College"
+  shortenedName: "VCC"
+
+vancouver_island_university:
+  emailDomains:
+    - "@viu.ca"
+  name: "Vancouver Island University"
+  shortenedName: "VIU"
+
+acsenda_school_of_management:
+  emailDomains:
+    - "@acsenda.com"
+  name: "Ascena School of Management"
+  shortenedName: "ASM"
+
+adler_university:
+  emailDomains:
+    - "@adler.edu"
+  name: "Adler University"
+  shortenedName: "AU"
+
+alexander_college:
+  emailDomains:
+    - "@alexandercollege.ca"
+  name: "Alexander College"
+  shortenedName: "AC"
+
+athabasca_university:
+  emailDomains:
+    - "@athabascau.ca"
+  name: "Athabasca University"
+  shortenedName: "AU"
+
+city_university_of_seattle:
+  emailDomains:
+    - "@cityu.edu"
+  name: "City University of Seattle"
+  shortenedName: "CityU"
+
+columbia_college:
+  emailDomains:
+    - "@columbiacollege.ca"
+  name: "Columbia College"
+  shortenedName: "CC"
+
+coquitlam_college:
+  emailDomains:
+    - "@coquitlamcollege.com"
+  name: "Coquitlam College"
+  shortenedName: "CC"
+
+corpus_christi_college:
+  emailDomains:
+    - "@corpuschristi.ca"
+  name: "Corpus Christi College"
+  shortenedName: "CCC"
+
+fairleigh_dickinson_university:
+  emailDomains:
+    - "@fdu.edu"
+  name: "Fairleigh Dickinson University"
+  shortenedName: "FDU"
+
+fraser_international_college:
+  emailDomains:
+    - "@fraseric.ca"
+  name: "Fraser International College"
+  shortenedName: "FIC"
+
+gonzaga_university:
+  emailDomains:
+    - "@gonzaga.edu"
+  name: "Gonzaga University"
+  shortenedName: "GU"
+
+lasalle_college_vancouver:
+  emailDomains:
+    - "@lasallecollegevancouver.com"
+  name: "LaSalle College Vancouver"
+  shortenedName: "LCV"
+
+pacific_coast_university_for_workplace_health_sciences:
+  emailDomains:
+    - "@pcu-whs.ca"
+  name: "Pacific Coast University for Workplace Health Sciences"
+  shortenedName: "PCU"
+
+new_york_institute_of_technology:
+  emailDomains:
+    - "@nyit.edu"
+  name: "New York Institute of Technology"
+  shortenedName: "NYIT"
+
+northeastern_university:
+  emailDomains:
+    - "@northeastern.edu"
+  name: "Northeastern University"
+  shortenedName: "NU"
+
+queens_university:
+  emailDomains:
+    - "@queensu.ca"
+  name: "Queen's University"
+  shortenedName: "Queen's"
+
+trinity_western_university:
+  emailDomains:
+    - "@twu.ca"
+  name: "Trinity Western University"
+  shortenedName: "TWU"
+
+university_canada_west:
+  emailDomains:
+    - "@ucanwest.ca"
+  name: "University Canada West"
+  shortenedName: "UCW"
+
+western_community_college:
+  emailDomains:
+    - "@wcc.ca"
+  name: "Western Community College"
+  shortenedName: "WCC"
+
+yorkville_university:
+  emailDomains:
+    - "@yorkvilleu.ca"
+  name: "Yorkville University"
+  shortenedName: "YU"

@@ -11,3 +11,10 @@ node_modules
 .nx/installation
 
 .npmrc
+
+.cdk.staging
+cdk.out
+
+**/*.decrypted*
+
+swagger/openapi.yaml
