@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
 import * as path from 'path';
 
 // Type for the school data structure
@@ -9,7 +8,7 @@ export interface SchoolData {
   shortenedName: string;
 }
 
-// Type for the entire YAML structure where keys are school identifiers
+// Type for the entire JSON structure where keys are school identifiers
 export interface SchoolListing {
   [schoolKey: string]: SchoolData;
 }
@@ -21,9 +20,9 @@ export interface SchoolInfo {
 }
 
 function loadSchoolListing(): SchoolListing {
-  const yamlPath = path.resolve(__dirname, 'allowedSchools.yaml');
-  const fileContents = fs.readFileSync(yamlPath, 'utf8');
-  return yaml.load(fileContents) as SchoolListing;
+  const jsonPath = path.resolve(__dirname, 'allowedSchools.json');
+  const fileContents = fs.readFileSync(jsonPath, 'utf8');
+  return JSON.parse(fileContents) as SchoolListing;
 }
 
 // Load schools data once when the module is imported
