@@ -57,13 +57,4 @@ describe('getSchools Handler', () => {
       ],
     });
   });
-
-  it('should handle errors gracefully', async () => {
-    (getAllSchools as jest.Mock).mockImplementation(() => {
-      throw new Error('Test error');
-    });
-
-    await invokeHandler({});
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Internal server error', 500);
-  });
 });

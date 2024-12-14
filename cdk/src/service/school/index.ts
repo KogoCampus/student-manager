@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import schoolListing from './allowedSchools.json';
 
 // Type for the school data structure
 export interface SchoolData {
@@ -18,15 +17,6 @@ export interface SchoolInfo {
   key: string;
   data: SchoolData;
 }
-
-function loadSchoolListing(): SchoolListing {
-  const jsonPath = path.resolve(__dirname, 'allowedSchools.json');
-  const fileContents = fs.readFileSync(jsonPath, 'utf8');
-  return JSON.parse(fileContents) as SchoolListing;
-}
-
-// Load schools data once when the module is imported
-const schoolListing = loadSchoolListing();
 
 export function isDesignatedSchoolEmail(email: string): boolean {
   const domain = `@${email.split('@')[1]}`;
@@ -52,7 +42,7 @@ export function getSchoolDataByEmail(email: string): SchoolData {
 
 // New utility functions that might be useful
 export function getSchoolByKey(schoolKey: string): SchoolData | undefined {
-  return schoolListing[schoolKey];
+  return (schoolListing as SchoolListing)[schoolKey];
 }
 
 export function getAllSchools(): SchoolListing {
