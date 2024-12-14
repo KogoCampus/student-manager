@@ -33,5 +33,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build and decrypt settings
+        run: pnpm dev --env=staging
+
       - name: Run tests
         run: pnpm test 
