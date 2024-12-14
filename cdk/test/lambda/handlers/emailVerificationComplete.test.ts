@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
-import { handler } from '../../../src/lambda/public/emailVerificationComplete';
+import { handler } from '../../../src/lambda/handlers/emailVerificationComplete';
 import { RedisClient } from '../../../src/service/redis';
 import * as authToken from '../../../src/service/email/authToken';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';

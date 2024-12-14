@@ -12,7 +12,7 @@ const VpcSubnetsSchema = z.object({
   public: SubnetConfigSchema,
 });
 
-const SettingsSchema = z.object({
+export const SettingsSchema = z.object({
   environment: z.string(),
   apigateway: z.object({
     restApiId: z.string(),
@@ -37,12 +37,6 @@ const SettingsSchema = z.object({
   sentry: z.object({
     dsn: z.string(),
     authToken: z.string(),
-  }),
-  internalApi: z.object({
-    auth: z.object({
-      name: z.string(),
-      password: z.string(),
-    }),
   }),
 });
 

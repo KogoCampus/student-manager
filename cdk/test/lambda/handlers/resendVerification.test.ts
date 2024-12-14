@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
-import { handler } from '../../../src/lambda/public/emailVerification';
+import { handler } from '../../../src/lambda/handlers/resendVerification';
 import { RedisClient } from '../../../src/service/redis';
-import { isDesignatedSchoolEmail } from '../../../src/service/school';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 
 jest.mock('../../../src/service/redis');
-jest.mock('../../../src/service/school');
 jest.mock('@aws-sdk/client-ses', () => ({
   SESClient: jest.fn().mockImplementation(() => ({
     send: jest.fn().mockResolvedValue({}),
@@ -14,8 +11,9 @@ jest.mock('@aws-sdk/client-ses', () => ({
   SendEmailCommand: jest.fn(),
 }));
 
-describe('emailVerification', () => {
+describe('resendVerification', () => {
   const mockRedis = {
+    get: jest.fn(),
     setWithExpiry: jest.fn(),
   };
 
@@ -32,7 +30,7 @@ describe('emailVerification', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (RedisClient.getInstance as jest.Mock).mockReturnValue(mockRedis);
-    (isDesignatedSchoolEmail as jest.Mock).mockReturnValue(true);
+    mockRedis.get.mockResolvedValue(null);
     jest.spyOn(handlerUtil, 'successResponse');
     jest.spyOn(handlerUtil, 'errorResponse');
   });
@@ -42,19 +40,23 @@ describe('emailVerification', () => {
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email query parameter is required', 400);
   });
 
-  it('should call errorResponse when email is not from designated school', async () => {
-    (isDesignatedSchoolEmail as jest.Mock).mockReturnValue(false);
-    await invokeHandler({
-      queryStringParameters: { email: 'test@example.com' },
-    });
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email is not from a designated school domain', 400);
-  });
-
-  it('should send verification email and store code in redis for valid email', async () => {
+  it('should call errorResponse when in cooldown period', async () => {
+    mockRedis.get.mockResolvedValue('wait');
     await invokeHandler({
       queryStringParameters: { email: 'test@sfu.ca' },
     });
-    expect(mockRedis.setWithExpiry).toHaveBeenCalled();
-    expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Verification email sent' });
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Please wait before requesting a new verification code', 429);
+  });
+
+  it('should resend verification code successfully', async () => {
+    const email = 'test@sfu.ca';
+    await invokeHandler({
+      queryStringParameters: { email },
+    });
+
+    expect(mockRedis.setWithExpiry).toHaveBeenCalledTimes(2);
+    expect(mockRedis.setWithExpiry).toHaveBeenCalledWith(email, expect.any(String), 900);
+    expect(mockRedis.setWithExpiry).toHaveBeenCalledWith(`resend:${email}`, 'wait', 30);
+    expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Verification code resent successfully' });
   });
 });

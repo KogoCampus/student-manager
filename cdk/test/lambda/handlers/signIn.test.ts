@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
-import { handler } from '../../../src/lambda/public/signIn';
+import { handler } from '../../../src/lambda/handlers/signIn';
 import { authenticateUser } from '../../../src/service/cognito';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 

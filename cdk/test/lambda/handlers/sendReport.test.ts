@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
-import { handler } from '../../../src/lambda/public/sendReport';
+import { handler } from '../../../src/lambda/handlers/sendReport';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 
 jest.mock('@aws-sdk/client-ses', () => ({

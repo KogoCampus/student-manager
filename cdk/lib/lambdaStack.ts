@@ -97,7 +97,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const emailVerificationLambda = new NodejsFunction(this, 'EmailVerificationHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/emailVerification.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/emailVerification.ts'),
       bundling,
     });
     emailVerificationLambda.addToRolePolicy(policies.ses.sendEmail);
@@ -112,7 +112,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const verifyEmailCompleteLambda = new NodejsFunction(this, 'VerifyEmailCompleteHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/emailVerificationComplete.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/emailVerificationComplete.ts'),
       bundling,
     });
 
@@ -125,7 +125,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const resendVerificationLambda = new NodejsFunction(this, 'ResendVerificationHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/resendVerification.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/resendVerification.ts'),
       bundling,
     });
     resendVerificationLambda.addToRolePolicy(policies.ses.sendEmail);
@@ -139,7 +139,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const userRegistrationLambda = new NodejsFunction(this, 'UserRegistrationHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/userRegistration.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/userRegistration.ts'),
       bundling,
     });
     userRegistrationLambda.addToRolePolicy(policies.cognito.userManagement);
@@ -153,7 +153,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const signInLambda = new NodejsFunction(this, 'SignInHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/signIn.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/signIn.ts'),
       bundling,
     });
     signInLambda.addToRolePolicy(policies.cognito.auth);
@@ -167,7 +167,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const passwordResetLambda = new NodejsFunction(this, 'PasswordResetHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/passwordReset.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/passwordReset.ts'),
       bundling,
     });
     passwordResetLambda.addToRolePolicy(policies.cognito.passwordReset);
@@ -181,7 +181,7 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const authenticateUserLambda = new NodejsFunction(this, 'AuthenticateUserHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/authenticateUser.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/authenticateUser.ts'),
       bundling,
     });
     authenticateUserLambda.addToRolePolicy(policies.cognito.getUser);
@@ -195,12 +195,25 @@ export class LambdaStack extends cdk.Stack {
     // =================================================================
     const sendReportLambda = new NodejsFunction(this, 'SendReportHandler', {
       ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/public/sendReport.ts'),
+      entry: path.join(__dirname, '../src/lambda/handlers/sendReport.ts'),
       bundling,
     });
     sendReportLambda.addToRolePolicy(policies.ses.sendEmail);
 
     const sendReportIntegration = new apigateway.LambdaIntegration(sendReportLambda);
     studentResource.addResource('send-report').addMethod('POST', sendReportIntegration);
+
+    // =================================================================
+    // Get Schools Lambda
+    // =================================================================
+    const getSchoolsLambda = new NodejsFunction(this, 'GetSchoolsHandler', {
+      ...nodeJsFunctionProps,
+      entry: path.join(__dirname, '../src/lambda/handlers/getSchools.ts'),
+      bundling,
+    });
+
+    // path: /student/schools
+    const getSchoolsIntegration = new apigateway.LambdaIntegration(getSchoolsLambda);
+    studentResource.addResource('schools').addMethod('GET', getSchoolsIntegration);
   }
 }

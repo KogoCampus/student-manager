@@ -1,80 +1,84 @@
 # Student Manager
-Student Manager is a combination of mono-projects to provide infrastructure code (CDK), lambda API handlers, and an Admin UI for managing student authentication, accounts, push notifications, 
 
-### Project Structure
-```
-packages/cdk --- Infrastructure code managed using AWS CDK, which deploys Lambda functions, API Gateway, and other AWS services.
-packages/ui --- Admin UI for managing users, sending manual push notifications, and other administrative tasks.
-lib/* --- Shared libraries used across different packages, including utility functions, services, and more.
-```
+AWS CDK project for user authentication system using AWS Cognito and ElastiCache.
 
-## Getting Started
-1. Add `.npmrc` in the project root to install depedencies from our private npm registry:  
-```
-@KogoCampus:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=your-github-token
-```
-Please refer [this](https://docs.catalyst.zoho.com/en/tutorials/githubbot/java/generate-personal-access-token/) to find how to obtain the personal github token.  
+## Prerequisites
 
-2. Install AWS SAM CLI  
-https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html  
+- [SOPS](https://github.com/mozilla/sops#install) installed locally
+- AWS CLI configured with Kogo AWS account
+- Node.js and pnpm
 
-3. Decrypt secrets
-```
-pnpm decrypt
-```
-> You should have installed AWS CLI and configured your local AWS profile.
+## Setup & Development
 
-4. Run development instances
+```bash
+# Install dependencies
+pnpm install
 
-This will start all development environment instances across packages (including CDK, UI, and others)
-```
+# Decrypt secrets and bundle CDK files
 pnpm dev
+
+# Run tests
+pnpm test
+
+# Deploy
+pnpm cdk:bootstrap
+pnpm cdk:deploy
 ```
 
-If you only want to work with CDK and the backend API (without running the UI), then navigate to the CDK and run the command.  
+## Adding New Handlers
+
+1. Create OpenAPI spec file in `cdk/src/docs` directory
+2. Add the Lambda function to `cdk/lib/lambdaStack.ts`:
+   ```typescript
+   const newHandlerLambda = new NodejsFunction(this, 'NewHandlerName', {
+     ...nodeJsFunctionProps,
+     entry: path.join(__dirname, '../src/lambda/handlers/newHandler.ts'),
+     bundling,
+   });
+   // Add required IAM policies
+   newHandlerLambda.addToRolePolicy(policies.cognito.userManagement);
+   
+   // Add API Gateway integration
+   const newHandlerIntegration = new apigateway.LambdaIntegration(newHandlerLambda);
+   studentResource.addResource('new-endpoint').addMethod('POST', newHandlerIntegration);
+   ```
+3. Deploy changes in AWS API Gateway console manually
+
+## Managing Settings
+
+Decrypt settings:
+```bash
+sops --config=./config/sops.yaml -d -i ./config/settings.staging.json
+sops --config=./config/sops.yaml -d -i ./config/settings.production.json
 ```
-cd packages/cdk
-pnpm dev
+
+Encrypt settings:
+```bash
+sops --config=./config/sops.yaml -e -i ./config/settings.staging.json
+sops --config=./config/sops.yaml -e -i ./config/settings.production.json
 ```
 
+## Commit Convention
 
-## CDK Development
-CDK is a key part of the Student Manager project, defining and deploying the AWS infrastructure. Below is an overview of the main components and how to add new Lambda handlers.
-```
-bin/student-manager.ts --- CDK entry point that governs the release of stacks.
-
-lib/*Stack.ts --- Stack files that define and create each service in Student Manager.
-
-lib/imports/* --- Contains properties for existing AWS services (not the ones Student Manager creates). 
-
-src/lambda/* --- Lambda handlers.
-
-src/lambda/*.yaml --- Lambda handlers' associated OpenAPI and SAM resource definitions.
-
-test/* --- Unit test files for each Lambda handler.
-
-serverless.yaml --- Base configuration file for AWS SAM, used for local testing of Lambda handlers.
+Use conventional commits with these types:
+```bash
+feat     # New features
+fix      # Bug fixes
+docs     # Documentation changes
+style    # Code style changes (formatting, etc)
+refactor # Code refactoring
+ci       # CI/CD changes
+test     # Adding/updating tests
+foo      # Minor changes
 ```
 
+Example:
+```bash
+git commit -m "feat: add registration handler"
+```
 
-### Creating a Lambda Handler
-To add a new Lambda handler to the Student Manager, follow these steps:
-- Add your Lambda handler in src/lambda.
-- Register the Lambda Handler via the CDK Stack.
+## Notes
 
-To deploy your Lambda handler to the remote environment, append the handler configuration to `lib/lambdaStack.ts`. 
-
-If the handler requires additional AWS resources, create a stack for those resources in the `lib/` directory.
-
-If you're using an existing AWS resource, add the necessary properties in `lib/import`.
-
-- Write the Lambda Handlers' Open API and SAM definition in handler_name.yml  
-
-- Add Unit Tests
-
-Create unit tests for your Lambda handler in the `test/lambda/` directory.
-
-- Deploy via GHA workflow, or locally by `pnpm deploy`
-
-> Note that deploying a new lambda handler won't be immediately affected to the API dns. You have to navigate to AWS API Gateway console and press "Deploy API" to the `staging` stage.  
+- No local test environment available
+- All testing must be done in remote environment
+- New endpoints require manual API Gateway deployment

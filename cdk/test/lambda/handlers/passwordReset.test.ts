@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
-import { handler } from '../../../src/lambda/public/passwordReset';
+import { handler } from '../../../src/lambda/handlers/passwordReset';
 import { doesUserExistByEmail, resetUserPassword } from '../../../src/service/cognito';
 import { getAuthToken, deleteAuthToken } from '../../../src/service/email/authToken';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';

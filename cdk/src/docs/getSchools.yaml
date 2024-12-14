@@ -1,0 +1,47 @@
+paths:
+  /student/schools:
+    get:
+      summary: Get all available schools information
+      description: Returns a list of all supported schools with their details.
+      responses:
+        '200':
+          description: List of schools retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schools:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - key
+                        - name
+                        - shortenedName
+                        - emailDomains
+                      properties:
+                        key:
+                          type: string
+                          example: "simon_fraser_university"
+                        name:
+                          type: string
+                          example: "Simon Fraser University"
+                        shortenedName:
+                          type: string
+                          example: "SFU"
+                        emailDomains:
+                          type: array
+                          items:
+                            type: string
+                          example: ["@sfu.ca"]
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error" 
