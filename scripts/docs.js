@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import YAML from 'yaml';
-import { glob } from 'glob';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+const fs = require('fs');
+const path = require('path');
+const YAML = require('yaml');
+const { glob } = require('glob');
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
 
 // ANSI color codes for prettier console output
 const colors = {
