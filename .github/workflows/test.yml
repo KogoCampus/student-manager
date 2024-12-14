@@ -32,6 +32,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Configure AWS Credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region us-west-2
+        shell: bash
+
       - name: Install pnpm
         run: npm install -g pnpm
 
