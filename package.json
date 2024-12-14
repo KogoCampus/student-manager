@@ -11,7 +11,6 @@
     "cdk:bootstrap": "cdk bootstrap",
     "cdk:deploy": "cdk deploy --all",
     "cdk:destroy": "cdk destroy --all",
-    "cdk": "cdk",
     "test": "jest --config cdk/test/jest.config.js",
     "lint": "eslint \"cdk/**/*.ts\"",
     "format": "prettier --check \"cdk/**/*.ts\"",
