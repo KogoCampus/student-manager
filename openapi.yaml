@@ -33,14 +33,10 @@ paths:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                  description: The desired username for the new student.
                 password:
                   type: string
                   description: The desired password for the new student.
               required:
-                - username
                 - password
       responses:
         "200":
@@ -107,9 +103,9 @@ paths:
             schema:
               type: object
               properties:
-                username:
+                email:
                   type: string
-                  description: The username of the student.
+                  description: The email of the student.
                 password:
                   type: string
                   description: The password of the student.
@@ -136,7 +132,7 @@ paths:
         "400":
           description: Bad request - missing or invalid parameters
         "401":
-          description: Unauthorized - invalid username or password
+          description: Unauthorized - invalid email or password
         "500":
           description: Internal server error
   /student/report:
