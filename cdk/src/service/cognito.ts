@@ -22,12 +22,12 @@ function getCognitoClient(): { cognito: CognitoIdentityProviderClient; clientId:
   return { cognito, clientId, userPoolId };
 }
 
-export async function createUserInCognito(email: string, username: string, password: string): Promise<AuthenticationResultType> {
+export async function createUserInCognito(email: string, password: string): Promise<AuthenticationResultType> {
   const { cognito, clientId, userPoolId } = getCognitoClient();
 
   const createUserCommand = new AdminCreateUserCommand({
     UserPoolId: userPoolId,
-    Username: username,
+    Username: email,
     MessageAction: 'SUPPRESS',
     UserAttributes: [
       { Name: 'email', Value: email },
@@ -37,7 +37,7 @@ export async function createUserInCognito(email: string, username: string, passw
 
   const setPasswordCommand = new AdminSetUserPasswordCommand({
     UserPoolId: userPoolId,
-    Username: username,
+    Username: email,
     Password: password,
     Permanent: true,
   });
@@ -48,7 +48,7 @@ export async function createUserInCognito(email: string, username: string, passw
     ClientId: clientId,
     AuthFlow: 'ADMIN_NO_SRP_AUTH',
     AuthParameters: {
-      USERNAME: username,
+      USERNAME: email,
       PASSWORD: password,
     },
   });
@@ -66,7 +66,7 @@ export async function createUserInCognito(email: string, username: string, passw
   }
 }
 
-export async function authenticateUser(username: string, password: string): Promise<AuthenticationResultType> {
+export async function authenticateUser(email: string, password: string): Promise<AuthenticationResultType> {
   const { cognito, clientId, userPoolId } = getCognitoClient();
 
   const authCommand = new AdminInitiateAuthCommand({
@@ -74,7 +74,7 @@ export async function authenticateUser(username: string, password: string): Prom
     ClientId: clientId,
     AuthFlow: 'ADMIN_NO_SRP_AUTH',
     AuthParameters: {
-      USERNAME: username,
+      USERNAME: email,
       PASSWORD: password,
     },
   });
@@ -142,12 +142,12 @@ export async function doesUserExistByEmail(email: string): Promise<boolean> {
   return (response.Users && response.Users.length > 0) || false;
 }
 
-export async function resetUserPassword(username: string, newPassword: string): Promise<void> {
+export async function resetUserPassword(email: string, newPassword: string): Promise<void> {
   const { cognito, userPoolId } = getCognitoClient();
 
   const command = new AdminSetUserPasswordCommand({
     UserPoolId: userPoolId,
-    Username: username,
+    Username: email,
     Password: newPassword,
     Permanent: true,
   });

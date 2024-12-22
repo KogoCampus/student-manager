@@ -5,12 +5,12 @@ import { authenticateUser } from '../../service/cognito';
 const signIn: APIGatewayProxyHandler = async event => {
   try {
     const requestBody = JSON.parse(event.body || '{}');
-    const { username, password } = requestBody;
-    if (!username || !password) {
-      return errorResponse('Username and password are required', 400);
+    const { email, password } = requestBody;
+    if (!email || !password) {
+      return errorResponse('email and password are required', 400);
     }
 
-    const authResult = await authenticateUser(username, password);
+    const authResult = await authenticateUser(email, password);
     if (!authResult) {
       return errorResponse('Invalid username or password', 401);
     }

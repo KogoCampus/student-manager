@@ -13,10 +13,10 @@ export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
 
   // Get username and password from the request body
   const requestBody = JSON.parse(event.body || '{}');
-  const { username, password } = requestBody;
-  // Check if username and password are provided
-  if (!username || !password) {
-    return errorResponse('Username and password are required in the request body', 400);
+  const { password } = requestBody;
+  // Check if password is provided
+  if (!password) {
+    return errorResponse('Password is required in the request body', 400);
   }
 
   // Verify the auth token after checking username and password
@@ -35,7 +35,7 @@ export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
   }
 
   // Proceed with user registration in Cognito
-  const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, username, password);
+  const { AccessToken, IdToken, RefreshToken } = await createUserInCognito(email, password);
 
   // Upon successful registration, delete the auth token from Redis
   await deleteAuthToken(email);

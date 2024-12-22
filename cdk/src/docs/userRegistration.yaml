@@ -24,14 +24,10 @@ paths:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                  description: The desired username for the new student.
                 password:
                   type: string
                   description: The desired password for the new student.
               required:
-                - username
                 - password
       responses:
         '200':
