@@ -32,22 +32,22 @@ describe('signIn', () => {
 
   it('should call errorResponse when username or password is missing', async () => {
     await invokeHandler({});
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Username and password are required', 400);
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('email and password are required', 400);
   });
 
   it('should call errorResponse when authentication fails', async () => {
     (authenticateUser as jest.Mock).mockResolvedValue(null);
     await invokeHandler({
-      body: JSON.stringify({ username: 'user', password: 'pass' }),
+      body: JSON.stringify({ email: 'email', password: 'pass' }),
     });
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Invalid username or password', 401);
   });
 
   it('should authenticate successfully with valid credentials', async () => {
     await invokeHandler({
-      body: JSON.stringify({ username: 'user', password: 'pass' }),
+      body: JSON.stringify({ email: 'email', password: 'pass' }),
     });
-    expect(authenticateUser).toHaveBeenCalledWith('user', 'pass');
+    expect(authenticateUser).toHaveBeenCalledWith('email', 'pass');
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({
       message: 'User successfully authenticated',
       accessToken: mockAuthResult.AccessToken,
