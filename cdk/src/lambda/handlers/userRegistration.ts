@@ -1,7 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
 import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../service/email/emailVerifiedToken';
-import { checkPasswordPolicy, createUserInCognito } from '../../service/cognito';
+import { createUserInCognito } from '../../service/cognito';
+import { CustomPasswordError, checkPasswordPolicy } from '../../service/passwordPolicy';
 
 export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
   const emailVerifiedToken = event.queryStringParameters?.emailVerifiedToken;
@@ -31,7 +32,7 @@ export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
   try {
     await checkPasswordPolicy(password);
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof CustomPasswordError) {
       return errorResponse(error.message, 400);
     }
   }
