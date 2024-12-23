@@ -4,19 +4,19 @@ import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../service/e
 import { createUserInCognito } from '../../service/cognito';
 
 export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
-  const email = event.queryStringParameters?.email;
   const emailVerifiedToken = event.queryStringParameters?.emailVerifiedToken;
 
-  if (!email || !emailVerifiedToken) {
-    return errorResponse('Email and email verified token are required', 400);
+  if (!emailVerifiedToken) {
+    return errorResponse('Email verified token is required', 400);
   }
 
-  // Get password from the request body
+  // Get email and password from the request body
   const requestBody = JSON.parse(event.body || '{}');
-  const { password } = requestBody;
-  // Check if password is provided
-  if (!password) {
-    return errorResponse('Password is required in the request body', 400);
+  const { email, password } = requestBody;
+
+  // Check if email and password are provided
+  if (!email || !password) {
+    return errorResponse('Email and password are required in the request body', 400);
   }
 
   // Verify the email verified token after checking email and password

@@ -29,7 +29,7 @@ const emailVerification: APIGatewayProxyHandler = async event => {
   if (doesUserExist) {
     return errorResponse('User already exists with the provided email', 409);
   }
-  
+
   try {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const redis = RedisClient.getInstance();
