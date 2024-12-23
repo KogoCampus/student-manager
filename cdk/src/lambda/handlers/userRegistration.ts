@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
 import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../service/email/emailVerifiedToken';
-import { createUserInCognito } from '../../service/cognito';
+import { checkPasswordPolicy, createUserInCognito } from '../../service/cognito';
 
 export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
   const emailVerifiedToken = event.queryStringParameters?.emailVerifiedToken;
@@ -26,6 +26,14 @@ export const handler: APIGatewayProxyHandler = wrapHandler(async event => {
   }
   if (emailVerifiedToken !== storedEmailVerifiedToken) {
     return errorResponse('Invalid email verified token', 401);
+  }
+
+  try {
+    await checkPasswordPolicy(password);
+  } catch (error) {
+    if (error instanceof Error) {
+      return errorResponse(error.message, 400);
+    }
   }
 
   // Proceed with user registration in Cognito

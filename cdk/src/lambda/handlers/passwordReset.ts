@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { doesUserExistByEmail, resetUserPassword } from '../../service/cognito';
+import { checkPasswordPolicy, doesUserExistByEmail, resetUserPassword } from '../../service/cognito';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
 import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../service/email/emailVerifiedToken';
 
@@ -32,13 +32,18 @@ const passwordReset: APIGatewayProxyHandler = async event => {
       return errorResponse('New password is required', 400);
     }
 
+    await checkPasswordPolicy(newPassword);
+
     // Reset the user password and remove the email verified token after successful password reset
     await resetUserPassword(email, newPassword);
     await deleteEmailVerifiedToken(email);
 
     return successResponse({ message: 'Password reset successfully' });
   } catch (error) {
-    return errorResponse(error instanceof Error ? error.message : 'Password reset failed', 500);
+    if (error instanceof Error) {
+      return errorResponse(error.message, 400);
+    }
+    return errorResponse('Password reset failed', 500);
   }
 };
 
