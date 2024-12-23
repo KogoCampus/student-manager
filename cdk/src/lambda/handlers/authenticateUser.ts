@@ -27,7 +27,6 @@ const authenticateUser: APIGatewayProxyHandler = async event => {
 
         return successResponse({
           userdata: {
-            username: userDetails.username,
             email: userDetails.email,
             schoolKey,
             schoolData,
@@ -41,7 +40,6 @@ const authenticateUser: APIGatewayProxyHandler = async event => {
 
         return successResponse({
           userdata: {
-            username: userDetails.username,
             email: userDetails.email,
             schoolKey,
             schoolData,

@@ -10,7 +10,7 @@ paths:
           description: The email address of the student.
           schema:
             type: string
-        - name: authToken
+        - name: emailVerifiedToken
           in: query
           required: true
           description: The authorization token received after email verification.
@@ -58,9 +58,9 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Email and authorization token are required"
+                    example: "Email and email verified token are required"
         '401':
-          description: Unauthorized - Invalid or expired authorization token.
+          description: Unauthorized - Invalid or expired email verified token.
           content:
             application/json:
               schema:
@@ -68,16 +68,6 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Invalid or expired authorization token"
-        '409':
-          description: Conflict - User already exists.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "User already exists with the provided email"
+                    example: "Invalid or expired email verified token"
         '500':
           description: Internal server error.

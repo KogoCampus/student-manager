@@ -2,7 +2,7 @@ paths:
   /student/verify-email/complete:
     post:
       summary: Complete email verification
-      description: Validates the verification code sent to the student's email and returns an authorization token if successful.
+      description: Validates the verification code sent to the student's email and returns an email verified token if successful.
       parameters:
         - name: email
           in: query
@@ -18,7 +18,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Email verified successfully and an authorization token returned
+          description: Email verified successfully and an email verified returned
           content:
             application/json:
               schema:
@@ -27,9 +27,9 @@ paths:
                   message:
                     type: string
                     example: "Email verified successfully."
-                  authToken:
+                  emailVerifiedToken:
                     type: string
-                    description: Authorization token for further authentication
+                    description: Email verified token for further authentication
                     example: "eyJhbGciOiJIUzI1NiIsInR5..."
         '400':
           description: Bad request - missing or invalid parameters

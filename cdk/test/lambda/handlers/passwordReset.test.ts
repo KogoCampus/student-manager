@@ -1,14 +1,14 @@
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
 import { handler } from '../../../src/lambda/handlers/passwordReset';
 import { doesUserExistByEmail, resetUserPassword } from '../../../src/service/cognito';
-import { getAuthToken, deleteAuthToken } from '../../../src/service/email/authToken';
+import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../../src/service/email/emailVerifiedToken';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 
 jest.mock('../../../src/service/cognito');
-jest.mock('../../../src/service/email/authToken');
+jest.mock('../../../src/service/email/emailVerifiedToken');
 
 describe('passwordReset', () => {
-  const mockStoredAuthToken = 'stored-auth-token';
+  const mockStoredEmailVerifiedToken = 'stored-email-verified-token';
   const mockEmail = 'test@sfu.ca';
   const mockNewPassword = 'newPassword123';
 
@@ -25,43 +25,43 @@ describe('passwordReset', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (getAuthToken as jest.Mock).mockResolvedValue(mockStoredAuthToken);
+    (getEmailVerifiedToken as jest.Mock).mockResolvedValue(mockStoredEmailVerifiedToken);
     (doesUserExistByEmail as jest.Mock).mockResolvedValue(true);
     jest.spyOn(handlerUtil, 'successResponse');
     jest.spyOn(handlerUtil, 'errorResponse');
   });
 
-  it('should call errorResponse when email or auth token is missing', async () => {
+  it('should call errorResponse when email or email verified token is missing', async () => {
     await invokeHandler({});
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email and authorization token are required', 400);
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email and email verified token are required', 400);
   });
 
-  it('should call errorResponse when auth token is expired', async () => {
-    (getAuthToken as jest.Mock).mockResolvedValue(null);
+  it('should call errorResponse when email verified token is expired', async () => {
+    (getEmailVerifiedToken as jest.Mock).mockResolvedValue(null);
     await invokeHandler({
-      queryStringParameters: { email: mockEmail, authToken: 'some-token' },
+      queryStringParameters: { email: mockEmail, emailVerifiedToken: 'some-token' },
     });
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Authorization token has expired or does not exist', 401);
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email verified token has expired or does not exist', 401);
   });
 
-  it('should call errorResponse when auth token is invalid', async () => {
+  it('should call errorResponse when email verified token is invalid', async () => {
     await invokeHandler({
-      queryStringParameters: { email: mockEmail, authToken: 'wrong-token' },
+      queryStringParameters: { email: mockEmail, emailVerifiedToken: 'wrong-token' },
     });
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Invalid authorization token', 401);
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Invalid email verified token', 401);
   });
 
   it('should call errorResponse when user does not exist', async () => {
     (doesUserExistByEmail as jest.Mock).mockResolvedValue(false);
     await invokeHandler({
-      queryStringParameters: { email: mockEmail, authToken: mockStoredAuthToken },
+      queryStringParameters: { email: mockEmail, emailVerifiedToken: mockStoredEmailVerifiedToken },
     });
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('User does not exist with the provided email', 404);
   });
 
   it('should call errorResponse when new password is missing', async () => {
     await invokeHandler({
-      queryStringParameters: { email: mockEmail, authToken: mockStoredAuthToken },
+      queryStringParameters: { email: mockEmail, emailVerifiedToken: mockStoredEmailVerifiedToken },
       body: JSON.stringify({}),
     });
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('New password is required', 400);
@@ -69,12 +69,12 @@ describe('passwordReset', () => {
 
   it('should reset password successfully with valid inputs', async () => {
     await invokeHandler({
-      queryStringParameters: { email: mockEmail, authToken: mockStoredAuthToken },
+      queryStringParameters: { email: mockEmail, emailVerifiedToken: mockStoredEmailVerifiedToken },
       body: JSON.stringify({ newPassword: mockNewPassword }),
     });
 
     expect(resetUserPassword).toHaveBeenCalledWith(mockEmail, mockNewPassword);
-    expect(deleteAuthToken).toHaveBeenCalledWith(mockEmail);
+    expect(deleteEmailVerifiedToken).toHaveBeenCalledWith(mockEmail);
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Password reset successfully' });
   });
 });
