@@ -13,12 +13,6 @@ paths:
       description: Registers a student after email verification and returns
         authentication tokens.
       parameters:
-        - name: email
-          in: query
-          required: true
-          description: The email address of the student.
-          schema:
-            type: string
         - name: emailVerifiedToken
           in: query
           required: true
@@ -26,17 +20,21 @@ paths:
           schema:
             type: string
       requestBody:
-        description: The username and password for student registration.
+        description: The registration details including email and password.
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
+                email:
+                  type: string
+                  description: The email address of the student.
                 password:
                   type: string
                   description: The desired password for the new student.
               required:
+                - email
                 - password
       responses:
         "200":
