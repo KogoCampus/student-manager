@@ -1,11 +1,11 @@
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
 import { handler } from '../../../src/lambda/handlers/emailVerificationComplete';
 import { RedisClient } from '../../../src/service/redis';
-import * as authToken from '../../../src/service/email/authToken';
+import * as emailVerifiedToken from '../../../src/service/email/emailVerifiedToken';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 
 jest.mock('../../../src/service/redis');
-jest.mock('../../../src/service/email/authToken');
+jest.mock('../../../src/service/email/emailVerifiedToken');
 
 describe('emailVerificationComplete', () => {
   const mockRedis = {
@@ -13,7 +13,7 @@ describe('emailVerificationComplete', () => {
     delete: jest.fn(),
   };
 
-  const mockAuthToken = 'mock-auth-token';
+  const mockEmailVerifiedToken = 'mock-email-verified-token';
 
   const invokeHandler = async (event: Partial<APIGatewayProxyEvent>) => {
     const context = {} as Context;
@@ -28,7 +28,7 @@ describe('emailVerificationComplete', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (RedisClient.getInstance as jest.Mock).mockReturnValue(mockRedis);
-    (authToken.generateAuthToken as jest.Mock).mockReturnValue(mockAuthToken);
+    (emailVerifiedToken.generateEmailVerifiedToken as jest.Mock).mockReturnValue(mockEmailVerifiedToken);
     jest.spyOn(handlerUtil, 'successResponse');
     jest.spyOn(handlerUtil, 'errorResponse');
   });
@@ -64,10 +64,10 @@ describe('emailVerificationComplete', () => {
     });
 
     expect(mockRedis.delete).toHaveBeenCalledWith(email);
-    expect(authToken.storeAuthToken).toHaveBeenCalledWith(email, mockAuthToken);
+    expect(emailVerifiedToken.storeEmailVerifiedToken).toHaveBeenCalledWith(email, mockEmailVerifiedToken);
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({
       message: 'Email verified successfully.',
-      authToken: mockAuthToken,
+      emailVerifiedToken: mockEmailVerifiedToken,
     });
   });
 });

@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
 import { RedisClient } from '../../service/redis';
-import { generateAuthToken, storeAuthToken } from '../../service/email/authToken';
+import { generateEmailVerifiedToken, storeEmailVerifiedToken } from '../../service/email/emailVerifiedToken';
 
 const emailVerificationComplete: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
@@ -25,13 +25,13 @@ const emailVerificationComplete: APIGatewayProxyHandler = async event => {
     // Verification successful, delete the code from Redis
     await redis.delete(email);
 
-    // Generate a new auth token and store it in Redis
-    const authToken = generateAuthToken();
-    await storeAuthToken(email, authToken);
+    // Generate a new email verified token and store it in Redis
+    const emailVerifiedToken = generateEmailVerifiedToken();
+    await storeEmailVerifiedToken(email, emailVerifiedToken);
 
     return successResponse({
       message: 'Email verified successfully.',
-      authToken,
+      emailVerifiedToken,
     });
   } catch (error) {
     return errorResponse(error instanceof Error ? error.message : 'Verification failed', 500);

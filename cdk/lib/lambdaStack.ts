@@ -101,11 +101,27 @@ export class LambdaStack extends cdk.Stack {
       bundling,
     });
     emailVerificationLambda.addToRolePolicy(policies.ses.sendEmail);
+    emailVerificationLambda.addToRolePolicy(policies.cognito.userManagement);
 
     // path: /student/verify-email
     const emailVerificationIntegration = new apigateway.LambdaIntegration(emailVerificationLambda);
     const verifyEmailResource = studentResource.addResource('verify-email');
     verifyEmailResource.addMethod('POST', emailVerificationIntegration);
+
+    // =================================================================
+    // Verify Email For Password Lambda
+    // =================================================================
+    const verifyEmailForPasswordLambda = new NodejsFunction(this, 'VerifyEmailForPasswordHandler', {
+      ...nodeJsFunctionProps,
+      entry: path.join(__dirname, '../src/lambda/handlers/emailVerificationForPassword.ts'),
+      bundling,
+    });
+    verifyEmailForPasswordLambda.addToRolePolicy(policies.ses.sendEmail);
+    verifyEmailForPasswordLambda.addToRolePolicy(policies.cognito.userManagement);
+
+    // path: /student/verify-email/password
+    const verifyEmailForPasswordIntegration = new apigateway.LambdaIntegration(verifyEmailForPasswordLambda);
+    verifyEmailResource.addResource('password').addMethod('POST',  verifyEmailForPasswordIntegration);
 
     // =================================================================
     // Verify Email Complete Lambda

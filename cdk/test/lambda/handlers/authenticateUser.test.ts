@@ -71,7 +71,6 @@ describe('authenticateUser', () => {
     });
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({
       userdata: {
-        username: mockUserDetails.username,
         email: mockUserDetails.email,
         schoolKey: mockSchoolInfo.key,
         schoolData: mockSchoolInfo.data,
@@ -86,7 +85,6 @@ describe('authenticateUser', () => {
     });
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({
       userdata: {
-        username: mockUserDetails.username,
         email: mockUserDetails.email,
         schoolKey: mockSchoolInfo.key,
         schoolData: mockSchoolInfo.data,

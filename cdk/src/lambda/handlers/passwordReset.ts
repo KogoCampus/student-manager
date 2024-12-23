@@ -1,24 +1,24 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { doesUserExistByEmail, resetUserPassword } from '../../service/cognito';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
-import { getAuthToken, deleteAuthToken } from '../../service/email/authToken';
+import { getEmailVerifiedToken, deleteEmailVerifiedToken } from '../../service/email/emailVerifiedToken';
 
 const passwordReset: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
-  const authToken = event.queryStringParameters?.authToken;
+  const emailVerifiedToken = event.queryStringParameters?.emailVerifiedToken;
 
-  if (!email || !authToken) {
-    return errorResponse('Email and authorization token are required', 400);
+  if (!email || !emailVerifiedToken) {
+    return errorResponse('Email and email verified token are required', 400);
   }
 
   try {
-    // Verify the auth token
-    const storedAuthToken = await getAuthToken(email);
-    if (!storedAuthToken) {
-      return errorResponse('Authorization token has expired or does not exist', 401);
+    // Verify the email verified token
+    const storedEmailVerifiedToken = await getEmailVerifiedToken(email);
+    if (!storedEmailVerifiedToken) {
+      return errorResponse('Email verified token has expired or does not exist', 401);
     }
-    if (storedAuthToken !== authToken) {
-      return errorResponse('Invalid authorization token', 401);
+    if (storedEmailVerifiedToken !== emailVerifiedToken) {
+      return errorResponse('Invalid email verified token', 401);
     }
 
     const userExists = await doesUserExistByEmail(email);
@@ -32,9 +32,9 @@ const passwordReset: APIGatewayProxyHandler = async event => {
       return errorResponse('New password is required', 400);
     }
 
-    // Reset the user password and remove the auth token after successful password reset
+    // Reset the user password and remove the email verified token after successful password reset
     await resetUserPassword(email, newPassword);
-    await deleteAuthToken(email);
+    await deleteEmailVerifiedToken(email);
 
     return successResponse({ message: 'Password reset successfully' });
   } catch (error) {
