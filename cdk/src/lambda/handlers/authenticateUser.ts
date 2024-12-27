@@ -22,20 +22,34 @@ const authenticateUser: APIGatewayProxyHandler = async event => {
   try {
     switch (grantType) {
       case 'access_token': {
-        const userDetails = await getUserDetailsFromAccessToken(token);
-        const { key: schoolKey, data: schoolData } = getSchoolInfoByEmail(userDetails.email);
+        let userDetails;
+        try {
+          userDetails = await getUserDetailsFromAccessToken(token);
+        } catch (error) {
+          if (error instanceof Error) {
+            return errorResponse(error.message, 400);
+          }
+        }
+        const { key: schoolKey, data: schoolData } = getSchoolInfoByEmail(userDetails!.email);
 
         return successResponse({
           userdata: {
-            email: userDetails.email,
+            email: userDetails!.email,
             schoolKey,
             schoolData,
           },
         });
       }
       case 'refresh_token': {
-        const newAccessToken = await refreshAccessToken(token);
-        const userDetails = await getUserDetailsFromAccessToken(newAccessToken);
+        let newAccessToken;
+        try {
+          newAccessToken = await refreshAccessToken(token);
+        } catch (error) {
+          if (error instanceof Error) {
+            return errorResponse(error.message, 400);
+          }
+        }
+        const userDetails = await getUserDetailsFromAccessToken(newAccessToken!);
         const { key: schoolKey, data: schoolData } = getSchoolInfoByEmail(userDetails.email);
 
         return successResponse({
