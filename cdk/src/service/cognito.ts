@@ -6,6 +6,7 @@ import {
   GetUserCommand,
   AuthenticationResultType,
   ListUsersCommand,
+  GetUserCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { settings } from '../settings';
 
@@ -96,7 +97,12 @@ export async function getUserDetailsFromAccessToken(accessToken: string): Promis
     AccessToken: accessToken,
   });
 
-  const response = await cognito.send(getUserCommand);
+  let response: GetUserCommandOutput;
+  try {
+    response = await cognito.send(getUserCommand);
+  } catch {
+    throw new Error('Access token is invalid or has expired.');
+  }
 
   if (response && response.Username && response.UserAttributes) {
     const email = response.UserAttributes.find(attr => attr.Name === 'email')?.Value;
@@ -122,7 +128,12 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
     },
   });
 
-  const response = await cognito.send(command);
+  let response;
+  try {
+    response = await cognito.send(command);
+  } catch {
+    throw new Error('Refresh token is invalid or has expired.');
+  }
 
   if (response.AuthenticationResult && response.AuthenticationResult.AccessToken) {
     return response.AuthenticationResult.AccessToken;
