@@ -27,7 +27,7 @@ const authenticateUser: APIGatewayProxyHandler = async event => {
           userDetails = await getUserDetailsFromAccessToken(token);
         } catch (error) {
           if (error instanceof Error) {
-            return errorResponse(error.message, 400);
+            return errorResponse(error.message, 401);
           }
         }
         const { key: schoolKey, data: schoolData } = getSchoolInfoByEmail(userDetails!.email);
@@ -46,7 +46,7 @@ const authenticateUser: APIGatewayProxyHandler = async event => {
           newAccessToken = await refreshAccessToken(token);
         } catch (error) {
           if (error instanceof Error) {
-            return errorResponse(error.message, 400);
+            return errorResponse(error.message, 401);
           }
         }
         const userDetails = await getUserDetailsFromAccessToken(newAccessToken!);

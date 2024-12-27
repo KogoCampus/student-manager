@@ -101,7 +101,7 @@ export async function getUserDetailsFromAccessToken(accessToken: string): Promis
   try {
     response = await cognito.send(getUserCommand);
   } catch {
-    throw new Error('Access token is invalid or expired.');
+    throw new Error('Access token is invalid or has expired.');
   }
 
   if (response && response.Username && response.UserAttributes) {
@@ -132,7 +132,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
   try {
     response = await cognito.send(command);
   } catch {
-    throw new Error('Refresh token is invalid or expired.');
+    throw new Error('Refresh token is invalid or has expired.');
   }
 
   if (response.AuthenticationResult && response.AuthenticationResult.AccessToken) {
