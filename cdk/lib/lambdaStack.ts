@@ -121,7 +121,7 @@ export class LambdaStack extends cdk.Stack {
 
     // path: /student/verify-email/password
     const verifyEmailForPasswordIntegration = new apigateway.LambdaIntegration(verifyEmailForPasswordLambda);
-    verifyEmailResource.addResource('password').addMethod('POST',  verifyEmailForPasswordIntegration);
+    verifyEmailResource.addResource('password').addMethod('POST', verifyEmailForPasswordIntegration);
 
     // =================================================================
     // Verify Email Complete Lambda
