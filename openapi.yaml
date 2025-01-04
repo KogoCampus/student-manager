@@ -123,7 +123,7 @@ paths:
           description: Unauthorized - invalid email or password
         "500":
           description: Internal server error
-  /student/report:
+  /student/send-report:
     post:
       summary: Report a content or a user
       description: Sends a report to the admin
