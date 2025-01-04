@@ -1,5 +1,5 @@
 paths:
-  /student/report:
+  /student/send-report:
     post:
       summary: Report a content or a user
       description: Sends a report to the admin
