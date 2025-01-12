@@ -70,7 +70,7 @@ const baseWrapper =
         const key = keyGenerator(event);
         // Skip rate limiting if key is undefined or null
         if (key) {
-          const rateLimitKey = `ratelimit:${key}`;
+          const rateLimitKey = `rate_limit:${key}`;
           const isRateLimited = await redis.get(rateLimitKey);
 
           if (isRateLimited) {
