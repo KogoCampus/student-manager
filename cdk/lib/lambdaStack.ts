@@ -137,20 +137,6 @@ export class LambdaStack extends cdk.Stack {
     verifyEmailResource.addResource('complete').addMethod('POST', verifyEmailCompleteIntegration);
 
     // =================================================================
-    // Resend Verification Lambda
-    // =================================================================
-    const resendVerificationLambda = new NodejsFunction(this, 'ResendVerificationHandler', {
-      ...nodeJsFunctionProps,
-      entry: path.join(__dirname, '../src/lambda/handlers/resendVerification.ts'),
-      bundling,
-    });
-    resendVerificationLambda.addToRolePolicy(policies.ses.sendEmail);
-
-    // path: /student/resend-verification
-    const resendVerificationIntegration = new apigateway.LambdaIntegration(resendVerificationLambda);
-    studentResource.addResource('resend-verification').addMethod('POST', resendVerificationIntegration);
-
-    // =================================================================
     // User Registration Lambda
     // =================================================================
     const userRegistrationLambda = new NodejsFunction(this, 'UserRegistrationHandler', {

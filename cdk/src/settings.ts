@@ -38,6 +38,14 @@ export const SettingsSchema = z.object({
     dsn: z.string(),
     authToken: z.string(),
   }),
+  gmail: z.object({
+    clientId: z.string(),
+    clientSecret: z.string(),
+    projectId: z.string(),
+    authUri: z.string(),
+    tokenUri: z.string(),
+    scopes: z.array(z.string()),
+  }),
 });
 
 type Settings = z.infer<typeof SettingsSchema>;

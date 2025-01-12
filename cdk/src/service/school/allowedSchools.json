@@ -5,7 +5,7 @@
     "shortenedName": "SFU"
   },
   "university_of_british_columbia": {
-    "emailDomains": ["@ubc.ca"],
+    "emailDomains": ["@ubc.ca", "student.ubc.ca"],
     "name": "University of British Columbia",
     "shortenedName": "UBC"
   }

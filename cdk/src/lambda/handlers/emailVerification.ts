@@ -1,17 +1,12 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
-import { buildEmailParams } from '../../service/email';
+import { sendEmail } from '../../service/email';
 import { RedisClient } from '../../service/redis';
 import { isDesignatedSchoolEmail } from '../../service/school';
-import { settings } from '../../settings';
 import { doesUserExistByEmail } from '../../service/cognito';
 
 // Constants
 const EXPIRATION_TIME = 900; // Set expiration to 15 minutes (900 seconds)
-
-// SES Client
-const SES = new SESClient({ region: settings.ses.sesIdentityRegion });
 
 const emailVerification: APIGatewayProxyHandler = async event => {
   const email = event.queryStringParameters?.email;
@@ -35,9 +30,11 @@ const emailVerification: APIGatewayProxyHandler = async event => {
     const redis = RedisClient.getInstance();
     await redis.setWithExpiry(email, verificationCode, EXPIRATION_TIME);
 
-    const emailParams = buildEmailParams(email, 'verification', { verificationCode }, 'welcome@kogocampus.com');
-    const command = new SendEmailCommand(emailParams);
-    await SES.send(command);
+    await sendEmail({
+      toEmail: email,
+      useCase: 'verification',
+      dynamicData: { verificationCode },
+    });
 
     return successResponse({ message: 'Verification email sent' });
   } catch (error) {
@@ -45,4 +42,10 @@ const emailVerification: APIGatewayProxyHandler = async event => {
   }
 };
 
-export const handler = wrapHandler(emailVerification);
+export const handler = wrapHandler(emailVerification, {
+  rateLimit: {
+    enabled: true,
+    cooldownSeconds: 15,
+    keyGenerator: event => event.queryStringParameters?.email,
+  },
+});

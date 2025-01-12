@@ -1,11 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { successResponse, errorResponse, wrapHandler } from '../handlerUtil';
-import { settings } from '../../settings';
-import { buildEmailParams } from '../../service/email';
-
-// SES Client
-const SES = new SESClient({ region: settings.ses.sesIdentityRegion });
+import { sendEmail } from '../../service/email';
 
 const sendReport: APIGatewayProxyHandler = async event => {
   try {
@@ -22,9 +17,11 @@ const sendReport: APIGatewayProxyHandler = async event => {
       reporterId,
     };
 
-    const emailParams = buildEmailParams('support@kogocampus.com', 'report', dynamicData, 'welcome@kogocampus.com');
-    const command = new SendEmailCommand(emailParams);
-    await SES.send(command);
+    await sendEmail({
+      toEmail: 'support@kogocampus.com',
+      useCase: 'report',
+      dynamicData,
+    });
 
     return successResponse({ message: 'Report sent successfully' });
   } catch (error) {
