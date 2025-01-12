@@ -154,24 +154,6 @@ paths:
           description: Bad request - missing or invalid parameters
         "500":
           description: Internal server error
-  /student/resend-verification:
-    post:
-      summary: Resend a verification code
-      description: Resends a verification code to the student's email.
-      parameters:
-        - name: email
-          in: query
-          required: true
-          description: The email address of the student.
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Verification email resent
-        "429":
-          description: Too many requests - please wait before resending
-        "500":
-          description: Internal server error
   /student/password-reset:
     post:
       summary: Reset password for a student
