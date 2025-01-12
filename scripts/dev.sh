@@ -28,23 +28,17 @@ fi
 CONFIG_DIR="./config"
 DECRYPTED_FILE="${CONFIG_DIR}/settings.decrypted.json"
 
-# Check if we should run decrypt
-if [ "$FORCE_DECRYPT" = true ] || [ ! -f "$DECRYPTED_FILE" ]; then
-    if [ "$FORCE_DECRYPT" = true ]; then
-        echo "Environment flag provided (${ENV}), forcing decryption..."
-    else
-        echo "Decrypted settings file not found. Running decrypt..."
-    fi
-    
-    ./scripts/decrypt.sh "$ENV"
-    
-    # Check if decryption was successful
-    if [ $? -ne 0 ]; then
-        echo "Error: Decryption failed"
-        exit 1
-    fi
+# Run decrypt
+if [ "$FORCE_DECRYPT" = true ]; then
+    echo "Environment flag provided (${ENV}), forcing decryption..."
 else
-    echo "Decrypted settings file exists, skipping decryption"
+    echo "Decrypted settings file not found. Running decrypt..."
+fi
+    
+./scripts/decrypt.sh "$ENV"
+if [ $? -ne 0 ]; then
+    echo "Error: Decryption failed"
+    exit 1
 fi
 
 # Run the build script

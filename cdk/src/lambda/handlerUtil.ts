@@ -57,31 +57,45 @@ export function errorResponse(
   };
 }
 
+/**
+ * Check if the request should be rate limited
+ * @returns true if request is allowed, false if it should be rate limited
+ */
+async function checkRateLimit(event: any, options: HandlerOptions): Promise<boolean> {
+  if (!options.rateLimit?.enabled) {
+    return true;
+  }
+
+  const redis = RedisClient.getInstance();
+  const keyGenerator = options.rateLimit.keyGenerator || (e => e.queryStringParameters?.email || e.requestContext.identity.sourceIp);
+
+  const key = keyGenerator(event);
+  if (!key) {
+    return true;
+  }
+
+  const rateLimitKey = `rate_limit:${key}`;
+  const isRateLimited = await redis.get(rateLimitKey);
+
+  if (isRateLimited) {
+    return false;
+  }
+
+  await redis.setWithExpiry(rateLimitKey, '1', options.rateLimit.cooldownSeconds);
+  return true;
+}
+
 // Base handler wrapper with error handling and rate limiting
 const baseWrapper =
   (handler: APIGatewayProxyHandler, options?: HandlerOptions): APIGatewayProxyHandler =>
   async (event, context, callback) => {
     try {
       // Rate limiting check
-      if (options?.rateLimit?.enabled) {
-        const redis = RedisClient.getInstance();
-        const keyGenerator = options.rateLimit.keyGenerator || (e => e.queryStringParameters?.email || e.requestContext.identity.sourceIp);
-
-        const key = keyGenerator(event);
-        // Skip rate limiting if key is undefined or null
-        if (key) {
-          const rateLimitKey = `rate_limit:${key}`;
-          const isRateLimited = await redis.get(rateLimitKey);
-
-          if (isRateLimited) {
-            return errorResponse('Too many requests. Please try again later.', 429, {
-              ...defaultHeaders,
-              'Retry-After': options.rateLimit.cooldownSeconds.toString(),
-            });
-          }
-
-          await redis.setWithExpiry(rateLimitKey, '1', options.rateLimit.cooldownSeconds);
-        }
+      if (options && !(await checkRateLimit(event, options))) {
+        return errorResponse('Too many requests. Please try again later.', 429, {
+          ...defaultHeaders,
+          'Retry-After': (options.rateLimit?.cooldownSeconds || 15).toString(),
+        });
       }
 
       const response = await handler(event, context, callback);

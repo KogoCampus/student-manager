@@ -2,10 +2,12 @@ import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
 import { handler } from '../../../src/lambda/handlers/emailVerification';
 import { RedisClient } from '../../../src/service/redis';
 import { isDesignatedSchoolEmail } from '../../../src/service/school';
+import { doesUserExistByEmail } from '../../../src/service/cognito';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
 
 jest.mock('../../../src/service/redis');
 jest.mock('../../../src/service/school');
+jest.mock('../../../src/service/cognito');
 jest.mock('@aws-sdk/client-ses', () => ({
   SESClient: jest.fn().mockImplementation(() => ({
     send: jest.fn().mockResolvedValue({}),
@@ -16,6 +18,8 @@ jest.mock('@aws-sdk/client-ses', () => ({
 describe('emailVerification', () => {
   const mockRedis = {
     setWithExpiry: jest.fn(),
+    get: jest.fn().mockResolvedValue(null),
+    delete: jest.fn(),
   };
 
   const invokeHandler = async (event: Partial<APIGatewayProxyEvent>) => {
@@ -32,6 +36,7 @@ describe('emailVerification', () => {
     jest.resetAllMocks();
     (RedisClient.getInstance as jest.Mock).mockReturnValue(mockRedis);
     (isDesignatedSchoolEmail as jest.Mock).mockReturnValue(true);
+    (doesUserExistByEmail as jest.Mock).mockResolvedValue(false);
     jest.spyOn(handlerUtil, 'successResponse');
     jest.spyOn(handlerUtil, 'errorResponse');
   });
@@ -47,6 +52,14 @@ describe('emailVerification', () => {
       queryStringParameters: { email: 'test@example.com' },
     });
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Email is not from a designated school domain', 400);
+  });
+
+  it('should call errorResponse when user already exists', async () => {
+    (doesUserExistByEmail as jest.Mock).mockResolvedValue(true);
+    await invokeHandler({
+      queryStringParameters: { email: 'test@sfu.ca' },
+    });
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('User already exists with the provided email', 409);
   });
 
   it('should send verification email and store code in redis for valid email', async () => {
