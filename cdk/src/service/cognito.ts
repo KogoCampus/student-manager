@@ -7,6 +7,7 @@ import {
   AuthenticationResultType,
   ListUsersCommand,
   GetUserCommandOutput,
+  AdminDeleteUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { settings } from '../settings';
 
@@ -161,6 +162,17 @@ export async function resetUserPassword(email: string, newPassword: string): Pro
     Username: email,
     Password: newPassword,
     Permanent: true,
+  });
+
+  await cognito.send(command);
+}
+
+export async function deleteUserFromCognito(username: string): Promise<void> {
+  const { cognito, userPoolId } = getCognitoClient();
+
+  const command = new AdminDeleteUserCommand({
+    UserPoolId: userPoolId,
+    Username: username,
   });
 
   await cognito.send(command);

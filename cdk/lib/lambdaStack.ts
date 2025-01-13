@@ -27,6 +27,7 @@ const policies = {
         'cognito-idp:AdminInitiateAuth',
         'cognito-idp:AdminCreateUser',
         'cognito-idp:ListUsers',
+        'cognito-idp:AdminDeleteUser',
       ],
       resources: [settings.cognito.userPoolArn],
     }),
@@ -217,5 +218,20 @@ export class LambdaStack extends cdk.Stack {
     // path: /student/schools
     const getSchoolsIntegration = new apigateway.LambdaIntegration(getSchoolsLambda);
     studentResource.addResource('schools').addMethod('GET', getSchoolsIntegration);
+
+    // =================================================================
+    // Delete User Lambda
+    // =================================================================
+    const deleteUserLambda = new NodejsFunction(this, 'DeleteUserHandler', {
+      ...nodeJsFunctionProps,
+      entry: path.join(__dirname, '../src/lambda/handlers/deleteUser.ts'),
+      bundling,
+    });
+    deleteUserLambda.addToRolePolicy(policies.cognito.getUser);
+    deleteUserLambda.addToRolePolicy(policies.cognito.userManagement);
+
+    // path: /student/delete
+    const deleteUserIntegration = new apigateway.LambdaIntegration(deleteUserLambda);
+    studentResource.addResource('delete-account').addMethod('DELETE', deleteUserIntegration);
   }
 }
