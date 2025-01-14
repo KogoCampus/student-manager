@@ -132,7 +132,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
   let response;
   try {
     response = await cognito.send(command);
-  } catch {
+  } catch (error) {
+    console.log('Refresh token is invalid or has expired.', error);
     throw new Error('Refresh token is invalid or has expired.');
   }
 
