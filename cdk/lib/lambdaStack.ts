@@ -188,6 +188,7 @@ export class LambdaStack extends cdk.Stack {
       bundling,
     });
     authenticateUserLambda.addToRolePolicy(policies.cognito.getUser);
+    authenticateUserLambda.addToRolePolicy(policies.cognito.auth);
 
     // path: /student/authenticate
     const authenticateUserIntegration = new apigateway.LambdaIntegration(authenticateUserLambda);
