@@ -221,7 +221,6 @@ paths:
                       required:
                         - key
                         - name
-                        - shortenedName
                         - emailDomains
                       properties:
                         key:
@@ -232,6 +231,7 @@ paths:
                           example: Simon Fraser University
                         shortenedName:
                           type: string
+                          nullable: true
                           example: SFU
                         emailDomains:
                           type: array
