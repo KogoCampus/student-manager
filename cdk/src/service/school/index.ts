@@ -4,7 +4,7 @@ import schoolListing from './allowedSchools.json';
 export interface SchoolData {
   emailDomains: string[];
   name: string;
-  shortenedName: string;
+  shortenedName: string | null;
 }
 
 // Type for the entire JSON structure where keys are school identifiers
@@ -19,8 +19,14 @@ export interface SchoolInfo {
 }
 
 export function isDesignatedSchoolEmail(email: string): boolean {
-  const domain = `@${email.split('@')[1]}`;
-  return Object.values(schoolListing).some(school => school.emailDomains.includes(domain));
+  const domain = email.split('@')[1].toLowerCase();
+  return Object.values(schoolListing).some(school =>
+    school.emailDomains.some(allowedDomain => {
+      const cleanAllowedDomain = allowedDomain.replace('@', '').toLowerCase();
+      // Check if it's an exact match or if it's a direct subdomain
+      return domain === cleanAllowedDomain || domain.endsWith('.' + cleanAllowedDomain);
+    }),
+  );
 }
 
 export function getSchoolInfoByEmail(email: string): SchoolInfo {
@@ -54,5 +60,9 @@ export function isSchoolData(data: unknown): data is SchoolData {
   if (!data || typeof data !== 'object') return false;
 
   const schoolData = data as SchoolData;
-  return Array.isArray(schoolData.emailDomains) && typeof schoolData.name === 'string' && typeof schoolData.shortenedName === 'string';
+  return (
+    Array.isArray(schoolData.emailDomains) &&
+    typeof schoolData.name === 'string' &&
+    (typeof schoolData.shortenedName === 'string' || schoolData.shortenedName === null)
+  );
 }

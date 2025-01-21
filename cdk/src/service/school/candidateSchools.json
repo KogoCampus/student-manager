@@ -9,11 +9,6 @@
       "name": "Camosun College",
       "shortenedName": "CC"
     },
-    "capilano_university": {
-      "emailDomains": ["@capilanou.ca"],
-      "name": "Capilano University",
-      "shortenedName": "CapU"
-    },
     "coast_mountain_college": {
       "emailDomains": ["@coastmountaincollege.ca"],
       "name": "Coast Mountain College",
@@ -29,30 +24,10 @@
       "name": "College of the Rockies",
       "shortenedName": "COTR"
     },
-    "douglas_college": {
-      "emailDomains": ["@douglascollege.ca"],
-      "name": "Douglas College",
-      "shortenedName": "DC"
-    },
-    "emily_carr_university_of_art_and_design": {
-      "emailDomains": ["@ecuad.ca"],
-      "name": "Emily Carr University of Art and Design",
-      "shortenedName": "ECU"
-    },
     "justice_institute_of_british_columbia": {
       "emailDomains": ["@jibc.ca"],
       "name": "Justice Institute of British Columbia",
       "shortenedName": "JIBC"
-    },
-    "kwantlen_polytechnic_university": {
-      "emailDomains": ["@kPU.ca"],
-      "name": "Kwantlen Polytechnic University",
-      "shortenedName": "KPU"
-    },
-    "langara_college": {
-      "emailDomains": ["@langara.ca"],
-      "name": "Langara College",
-      "shortenedName": "LC"
     },
     "nicola_valley_institute_of_technology": {
       "emailDomains": ["@nvit.ca"],
@@ -98,16 +73,6 @@
       "emailDomains": ["@ufv.ca"],
       "name": "University of the Fraser Valley",
       "shortenedName": "UFV"
-    },
-    "university_of_victoria": {
-      "emailDomains": ["@uvic.ca"],
-      "name": "University of Victoria",
-      "shortenedName": "UVic"
-    },
-    "vancouver_community_college": {
-      "emailDomains": ["@vcc.ca"],
-      "name": "Vancouver Community College",
-      "shortenedName": "VCC"
     },
     "vancouver_island_university": {
       "emailDomains": ["@viu.ca"],
