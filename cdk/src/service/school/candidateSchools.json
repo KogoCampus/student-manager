@@ -1,9 +1,4 @@
 {
-    "british_columbia_institute_of_technology": {
-      "emailDomains": ["@bcit.ca"],
-      "name": "British Columbia Institute of Technology",
-      "shortenedName": "BCIT"
-    },
     "camosun_college": {
       "emailDomains": ["@camosun.ca"],
       "name": "Camosun College",

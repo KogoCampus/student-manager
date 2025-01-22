@@ -43,5 +43,10 @@
     "emailDomains": ["@kPU.ca"],
     "name": "Kwantlen Polytechnic University",
     "shortenedName": "KPU"
+  },
+  "british_columbia_institute_of_technology": {
+    "emailDomains": ["@bcit.ca"],
+    "name": "British Columbia Institute of Technology",
+    "shortenedName": "BCIT"
   }
 } 
