@@ -1,6 +1,18 @@
 import { SendEmailCommandInput } from '@aws-sdk/client-ses';
 import emailTemplates from './emailTemplate.json';
 
+type EmailTemplate = {
+  Template: {
+    SubjectPart: string;
+    TextPart: string;
+    HtmlPart: string;
+  };
+};
+
+type EmailTemplates = {
+  [key: string]: EmailTemplate;
+};
+
 /**
  * Utility function to build the email parameters for SES
  * @param toEmail - The recipient email address
@@ -15,8 +27,7 @@ export function buildEmailParams(
   dynamicData: Record<string, string>,
   sourceEmail: string,
 ): SendEmailCommandInput {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectedTemplate = (emailTemplates as { [key: string]: any })[useCase];
+  const selectedTemplate = (emailTemplates as EmailTemplates)[useCase];
 
   if (!selectedTemplate) {
     throw new Error(`No email template found for use case: ${useCase}`);
@@ -55,6 +66,7 @@ export function buildEmailParams(
     Source: sourceEmail,
   };
 }
+
 /**
  * Helper function to replace dynamic fields in the template
  * @param templateStr - The template string containing placeholders (e.g., {{verificationCode}})

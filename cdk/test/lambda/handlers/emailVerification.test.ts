@@ -4,15 +4,13 @@ import { RedisClient } from '../../../src/service/redis';
 import { isDesignatedSchoolEmail } from '../../../src/service/school';
 import { doesUserExistByEmail } from '../../../src/service/cognito';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
+import * as emailService from '../../../src/service/email';
 
 jest.mock('../../../src/service/redis');
 jest.mock('../../../src/service/school');
 jest.mock('../../../src/service/cognito');
-jest.mock('@aws-sdk/client-ses', () => ({
-  SESClient: jest.fn().mockImplementation(() => ({
-    send: jest.fn().mockResolvedValue({}),
-  })),
-  SendEmailCommand: jest.fn(),
+jest.mock('../../../src/service/email', () => ({
+  sendEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('emailVerification', () => {
@@ -34,6 +32,7 @@ describe('emailVerification', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(Math, 'random').mockReturnValue(0.123456);
     (RedisClient.getInstance as jest.Mock).mockReturnValue(mockRedis);
     (isDesignatedSchoolEmail as jest.Mock).mockReturnValue(true);
     (doesUserExistByEmail as jest.Mock).mockResolvedValue(false);
@@ -63,10 +62,31 @@ describe('emailVerification', () => {
   });
 
   it('should send verification email and store code in redis for valid email', async () => {
+    const testEmail = 'test@sfu.ca';
+    await invokeHandler({
+      queryStringParameters: { email: testEmail },
+    });
+
+    // Verify code was stored in Redis
+    expect(mockRedis.setWithExpiry).toHaveBeenCalled();
+
+    // Verify email was sent with correct parameters
+    expect(emailService.sendEmail).toHaveBeenCalledWith({
+      toEmail: testEmail,
+      useCase: 'verification',
+      dynamicData: { verificationCode: '211110' },
+    });
+    expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Verification email sent' });
+  });
+
+  it('should handle email sending errors gracefully', async () => {
+    const error = new Error('Failed to send email');
+    (emailService.sendEmail as jest.Mock).mockRejectedValueOnce(error);
+
     await invokeHandler({
       queryStringParameters: { email: 'test@sfu.ca' },
     });
-    expect(mockRedis.setWithExpiry).toHaveBeenCalled();
-    expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Verification email sent' });
+
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Failed to send email', 500);
   });
 });

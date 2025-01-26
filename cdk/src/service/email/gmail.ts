@@ -74,29 +74,30 @@ async function getValidAccessToken(): Promise<string> {
  * Convert email parameters to MIME message
  */
 function createMimeMessage({ to, subject, textContent, htmlContent }: SendGmailOptions): string {
+  const boundary = 'boundary_' + Math.random().toString(36).substring(2);
+
   const message = [
     `From: Kogo Campus <welcometokogo@gmail.com>`,
     `To: ${to}`,
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
-    'Content-Type: multipart/alternative; boundary="boundary"',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
     '',
-    '--boundary',
+    `--${boundary}`,
     'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 7bit',
     '',
-    textContent.trim(),
+    textContent,
     '',
-    '--boundary',
+    `--${boundary}`,
     'Content-Type: text/html; charset=UTF-8',
-    'Content-Transfer-Encoding: 7bit',
     '',
-    htmlContent.trim(),
+    htmlContent,
     '',
-    '--boundary--',
+    `--${boundary}--`,
   ].join('\r\n');
 
-  return Buffer.from(message).toString('base64url');
+  // Convert to base64url format (base64 with URL-safe characters)
+  return Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /**

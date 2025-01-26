@@ -1,12 +1,11 @@
 import { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
 import { handler } from '../../../src/lambda/handlers/sendReport';
 import * as handlerUtil from '../../../src/lambda/handlerUtil';
+import * as emailService from '../../../src/service/email';
 
-jest.mock('@aws-sdk/client-ses', () => ({
-  SESClient: jest.fn().mockImplementation(() => ({
-    send: jest.fn().mockResolvedValue({}),
-  })),
-  SendEmailCommand: jest.fn(),
+// Mock email service
+jest.mock('../../../src/service/email', () => ({
+  sendEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('sendReport', () => {
@@ -54,6 +53,23 @@ describe('sendReport', () => {
     await invokeHandler({
       body: JSON.stringify(mockReport),
     });
+
+    expect(emailService.sendEmail).toHaveBeenCalledWith({
+      toEmail: 'support@kogocampus.com',
+      useCase: 'report',
+      dynamicData: mockReport,
+    });
     expect(handlerUtil.successResponse).toHaveBeenCalledWith({ message: 'Report sent successfully' });
+  });
+
+  it('should handle email sending errors gracefully', async () => {
+    const error = new Error('Failed to send email');
+    (emailService.sendEmail as jest.Mock).mockRejectedValueOnce(error);
+
+    await invokeHandler({
+      body: JSON.stringify(mockReport),
+    });
+
+    expect(handlerUtil.errorResponse).toHaveBeenCalledWith('Failed to send email', 500);
   });
 });
