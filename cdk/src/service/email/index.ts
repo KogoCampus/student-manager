@@ -1,21 +1,19 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { settings } from '../../settings';
+// import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { buildEmailParams } from './emailTemplate';
-// import { sendGmailEmail } from './gmail';
+import { sendGmailEmail } from './gmail';
 
-// Initialize SES Client
-const SES = new SESClient({ region: settings.ses.sesIdentityRegion });
+// // Initialize SES Client
+// const SES = new SESClient({ region: settings.ses.sesIdentityRegion });
 
 export interface SendEmailOptions {
   toEmail: string;
   useCase: string;
   dynamicData: Record<string, string>;
   sourceEmail?: string;
-  schoolKey?: string; // Optional school key to determine email service
 }
 
 /**
- * Centralized function to send emails using SES
+ * Centralized function to send emails using Gmail
  * This allows us to add middleware, logging, or other functionality in one place
  */
 export async function sendEmail({
@@ -26,16 +24,19 @@ export async function sendEmail({
 }: SendEmailOptions): Promise<void> {
   const emailParams = buildEmailParams(toEmail, useCase, dynamicData, sourceEmail);
 
-  // // Use Gmail for specific schools
-  // if (schoolKey === 'sfu') { // Add more schools as needed
-  //   const { Subject, Body } = emailParams.Message;
-  //   await sendGmailEmail(toEmail, Subject.Data, Body.Text.Data, Body.Html.Data, sourceEmail);
-  //   return;
-  // }
+  if (!emailParams.Message?.Subject?.Data || !emailParams.Message?.Body?.Text?.Data || !emailParams.Message?.Body?.Html?.Data) {
+    throw new Error('Invalid email parameters: missing required fields');
+  }
 
-  // Default to SES
-  const command = new SendEmailCommand(emailParams);
-  await SES.send(command);
+  await sendGmailEmail({
+    to: toEmail,
+    subject: emailParams.Message.Subject.Data,
+    textContent: emailParams.Message.Body.Text.Data,
+    htmlContent: emailParams.Message.Body.Html.Data,
+  });
+
+  // const command = new SendEmailCommand(emailParams);
+  // await SES.send(command);
 }
 
 export { buildEmailParams } from './emailTemplate';

@@ -55,7 +55,6 @@ export function buildEmailParams(
     Source: sourceEmail,
   };
 }
-
 /**
  * Helper function to replace dynamic fields in the template
  * @param templateStr - The template string containing placeholders (e.g., {{verificationCode}})

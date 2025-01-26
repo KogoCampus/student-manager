@@ -45,6 +45,14 @@ export const SettingsSchema = z.object({
     authUri: z.string(),
     tokenUri: z.string(),
     scopes: z.array(z.string()),
+    credentials: z
+      .object({
+        access_token: z.string().optional(),
+        refresh_token: z.string().optional(),
+        expiry_date: z.number().optional(),
+        token_type: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 
