@@ -48,6 +48,7 @@ export function errorResponse(
   statusCode: number = 400,
   headers: Record<string, string> = defaultHeaders,
 ): APIGatewayProxyResult {
+  console.log('errorResponse', message, statusCode, headers);
   return {
     statusCode,
     headers,
