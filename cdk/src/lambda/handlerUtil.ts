@@ -49,6 +49,8 @@ export function errorResponse(
   headers: Record<string, string> = defaultHeaders,
 ): APIGatewayProxyResult {
   console.log('errorResponse', message, statusCode, headers);
+  Sentry.captureMessage(`[${statusCode}] ${message}`, 'info');
+
   return {
     statusCode,
     headers,
