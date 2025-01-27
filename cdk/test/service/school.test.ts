@@ -1,6 +1,27 @@
 import { isDesignatedSchoolEmail, getSchoolInfoByEmail } from '../../src/service/school';
+import schoolListing from '../../src/service/school/allowedSchools.json';
 
 describe('School Service', () => {
+  describe('allowedSchools.json validation', () => {
+    it('should not have duplicate email domains across schools', () => {
+      // Collect all domains from all schools
+      const allDomains = new Set<string>();
+      const duplicates: string[] = [];
+
+      Object.entries(schoolListing).forEach(([schoolKey, school]) => {
+        school.emailDomains.forEach(domain => {
+          const cleanDomain = domain.replace('@', '').toLowerCase();
+          if (allDomains.has(cleanDomain)) {
+            duplicates.push(`Domain ${domain} in ${schoolKey} is duplicated`);
+          }
+          allDomains.add(cleanDomain);
+        });
+      });
+
+      expect(duplicates).toEqual([]);
+    });
+  });
+
   describe('isDesignatedSchoolEmail', () => {
     it('should return true for exact domain matches', () => {
       expect(isDesignatedSchoolEmail('student@sfu.ca')).toBe(true);
@@ -31,6 +52,13 @@ describe('School Service', () => {
       expect(result.key).toBe('simon_fraser_university');
       expect(result.data.name).toBe('Simon Fraser University');
       expect(result.data.shortenedName).toBe('SFU');
+    });
+
+    it('should handle subdomains correctly', () => {
+      const result = getSchoolInfoByEmail('student@cs.vcc.ca');
+      expect(result.key).toBe('vancouver_community_college');
+      expect(result.data.name).toBe('Vancouver Community College');
+      expect(result.data.shortenedName).toBe('VCC');
     });
 
     it('should throw error for invalid email domain', () => {

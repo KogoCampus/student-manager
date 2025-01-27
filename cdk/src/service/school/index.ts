@@ -30,8 +30,13 @@ export function isDesignatedSchoolEmail(email: string): boolean {
 }
 
 export function getSchoolInfoByEmail(email: string): SchoolInfo {
-  const domain = `@${email.split('@')[1]}`;
-  const entry = Object.entries(schoolListing).find(([, school]) => school.emailDomains.includes(domain));
+  const domain = email.split('@')[1].toLowerCase();
+  const entry = Object.entries(schoolListing).find(([, school]) =>
+    school.emailDomains.some(allowedDomain => {
+      const cleanAllowedDomain = allowedDomain.replace('@', '').toLowerCase();
+      return domain === cleanAllowedDomain || domain.endsWith('.' + cleanAllowedDomain);
+    }),
+  );
 
   if (!entry) {
     throw new Error('Email domain does not belong to any school');
