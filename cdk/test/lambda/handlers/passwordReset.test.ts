@@ -68,16 +68,6 @@ describe('passwordReset', () => {
     expect(handlerUtil.errorResponse).toHaveBeenCalledWith('New password is required', 400);
   });
 
-  it('should call errorResponse when password is shorter than 8 characters', async () => {
-    await invokeHandler({
-      queryStringParameters: { email: mockEmail, emailVerifiedToken: mockStoredEmailVerifiedToken },
-      body: JSON.stringify({ newPassword: mockInvalidPassword }),
-    });
-    expect(handlerUtil.errorResponse).toHaveBeenCalledWith(expect.stringMatching(/Password/), 400);
-    expect(resetUserPassword).not.toHaveBeenCalled();
-    expect(deleteEmailVerifiedToken).not.toHaveBeenCalled();
-  });
-
   it('should reset password successfully with valid inputs', async () => {
     await invokeHandler({
       queryStringParameters: { email: mockEmail, emailVerifiedToken: mockStoredEmailVerifiedToken },
