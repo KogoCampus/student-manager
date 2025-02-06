@@ -1,4 +1,44 @@
 {
+    "douglas_college": {
+      "emailDomains": ["@douglascollege.ca"],
+      "name": "Douglas College",
+      "shortenedName": null
+    },
+    "langara_college": {
+      "emailDomains": ["@langara.ca"],
+      "name": "Langara College",
+      "shortenedName": null
+    },
+    "emily_carr_university_of_art_and_design": {
+      "emailDomains": ["@ecuad.ca"],
+      "name": "Emily Carr University of Art and Design",
+      "shortenedName": "ECUAD"
+    },
+    "university_of_victoria": {
+      "emailDomains": ["@uvic.ca"],
+      "name": "University of Victoria",
+      "shortenedName": "UVic"
+    },
+    "vancouver_community_college": {
+      "emailDomains": ["@vcc.ca"],
+      "name": "Vancouver Community College",
+      "shortenedName": "VCC"
+    },
+    "capilano_university": {
+      "emailDomains": ["@capilanou.ca"],
+      "name": "Capilano University",
+      "shortenedName": "CapU"
+    },
+    "kwantlen_polytechnic_university": {
+      "emailDomains": ["@kPU.ca"],
+      "name": "Kwantlen Polytechnic University",
+      "shortenedName": "KPU"
+    },
+    "british_columbia_institute_of_technology": {
+      "emailDomains": ["@bcit.ca"],
+      "name": "British Columbia Institute of Technology",
+      "shortenedName": "BCIT"
+    },
     "camosun_college": {
       "emailDomains": ["@camosun.ca"],
       "name": "Camosun College",
