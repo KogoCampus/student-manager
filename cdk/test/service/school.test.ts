@@ -55,10 +55,10 @@ describe('School Service', () => {
     });
 
     it('should handle subdomains correctly', () => {
-      const result = getSchoolInfoByEmail('student@cs.vcc.ca');
-      expect(result.key).toBe('vancouver_community_college');
-      expect(result.data.name).toBe('Vancouver Community College');
-      expect(result.data.shortenedName).toBe('VCC');
+      const result = getSchoolInfoByEmail('student@cs.ubc.ca');
+      expect(result.key).toBe('university_of_british_columbia');
+      expect(result.data.name).toBe('University of British Columbia');
+      expect(result.data.shortenedName).toBe('UBC');
     });
 
     it('should throw error for invalid email domain', () => {

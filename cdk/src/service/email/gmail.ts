@@ -44,8 +44,8 @@ async function getValidAccessToken(): Promise<string> {
 
   try {
     // Get new access token using refresh token
-    const response = await oauth2Client.refreshToken(credentials.refresh_token);
-    const newCredentials: Credentials = response.tokens;
+    const response = await oauth2Client.refreshAccessToken();
+    const newCredentials: Credentials = response.credentials;
 
     if (!newCredentials?.access_token) {
       throw new Error('Failed to get access token from refresh token');
